@@ -1,0 +1,19 @@
+{
+  "name": "gonfalon-sports-book",
+  "version": "0.0.1",
+  "description": "Play money, competitive, bookmaking application belnding sports, politics, and pop-culture. The application is a realization of a thought expirment by Matt Sienkiewicz w/ Nate Meyvis. See http://gonfalonbubble.com/?p=28",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidsharff/gonfalon-sports-book.git"
+  },
+  "author": "David Sharff",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/davidsharff/gonfalon-sports-book/issues"
+  },
+  "homepage": "https://github.com/davidsharff/gonfalon-sports-book#readme"
+}
