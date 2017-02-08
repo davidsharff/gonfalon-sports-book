@@ -26,13 +26,14 @@ argParser.addArgument(
   }
 );
 
-argParser.addArgument(
-  ['-prod', '--production'],
-  {
-    help: 'Run in production mode',
-    action: 'storeTrue'
-  }
-);
+// TODO: waiting on gzip fix on server.
+// argParser.addArgument(
+//   ['-prod', '--production'],
+//   {
+//     help: 'Run in production mode',
+//     action: 'storeTrue'
+//   }
+// );
 
 let args = argParser.parseArgs();
 

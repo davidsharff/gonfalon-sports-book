@@ -12,4 +12,3 @@ ReactDOM.render((
     Hello, world! I'm the Gonfalon Sports Book.
   </div>
 ), document.getElementById('app'));
-
