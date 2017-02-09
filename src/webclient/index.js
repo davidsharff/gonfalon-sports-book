@@ -6,17 +6,19 @@ require('lodash').noConflict();
 
 const React = require('react');
 const ReactDOM = require('react-dom');
+const {Provider} = require('react-redux');
+const store = require('./store');
+const Root = require('./containers/Root');
+const socket = require('./socket');
+// TODO: toggle require when we support prod vs dev mode.
+const DevTools = require('./components/devtools/devtools');
 
-const ws = new window.WebSocket(`ws://${window.location.host}`);
-
-ws.onmessage = ({data: action}) => console.log(action);
-ws.onopen  = () => console.log('opening socket');
-
-// Test sending message to server.
-setTimeout(() => ws.send(JSON.stringify({type: 'TEST_CLIENT_MESSAGE'})), 1000);
+socket.onMessage(({data: action}) => store.dispatch(JSON.parse(action)));
 
 ReactDOM.render((
-  <div>
-    <div>Hello, world! I'm the Gonfalon Sports Book.</div>
-  </div>
+  <Provider store={store}>
+    <Root>
+      {DevTools ? <DevTools /> : null}
+     </Root>
+  </Provider>
 ), document.getElementById('app'));
