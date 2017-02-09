@@ -3,7 +3,9 @@
 const path = require('path');
 const http = require('http');
 const express = require('express');
+const WebSocketServer = require('ws').Server;
 const {getArgs} = require('./args');
+const Client = require('./client');
 const DIST_PATH = path.resolve(__dirname, '../../public/');
 
 const app = express();
@@ -28,6 +30,9 @@ app.use('/', (req, res) => {
 
 // Create WebSocket server.
 const server = http.createServer();
+const wss = new WebSocketServer({ server: server });
+wss.on('connection', (ws) => new Client(ws));
+
 
 // Listen.
 server.on('request', app);
