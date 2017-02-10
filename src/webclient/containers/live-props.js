@@ -8,8 +8,8 @@ const {ADD_PROP} = require('../../shared/action-types');
 const {createRandomId} = require('../../shared/utils');
 
 const {PropTypes} = React;
-@connect((state) => ({
-  liveProps: state.liveProps || []
+@connect(({app}) => ({
+  liveProps: app.liveProps
 }))
 @autobind
 class LiveProps extends React.Component {

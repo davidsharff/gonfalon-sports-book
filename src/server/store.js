@@ -2,10 +2,12 @@
 const {createStore} = require('redux');
 const reducer = require('./reducer');
 
-const initialState = {
-  liveProps: []
+const initialAppState = {
+  app: {
+    liveProps: []
+  }
 };
 
-const store = createStore(reducer, initialState);
+const store = createStore(reducer, initialAppState);
 
 module.exports = store;

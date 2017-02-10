@@ -13,13 +13,13 @@ class Client {
     clients = [...clients, this];
     this._ws.on('message', this._onMessage);
     this._ws.on('close', this._onClose);
-    console.log('New client connection');
+    this.sendCurrentState();
   }
 
   sendCurrentState() {
     this._send({
       type: SET_NEW_APP_STATE,
-      payload: store.getState()
+      payload: store.getState().app
     });
   }
 

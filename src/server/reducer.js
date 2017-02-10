@@ -7,7 +7,9 @@ function appReducer(state, action) {
     case actionTypes.ADD_PROP: {
       const {id, description} = payload;
       return Object.assign({}, state, {
-        liveProps: [...state.liveProps, {id, description}]
+        app: {
+          liveProps: [...state.app.liveProps, {id, description}]
+        }
       });
     }
     case actionTypes.REDUX_INIT_ACTION: {

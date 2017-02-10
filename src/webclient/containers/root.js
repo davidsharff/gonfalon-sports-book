@@ -1,15 +1,27 @@
 'use strict';
 const React = require('react');
-const LiveProps = require('./live-props');
+const {connect} = require('react-redux');
+const _ = require('lodash');
 
+@connect(({app}) => ({
+  hasAppState: !_.isEmpty(app)
+}))
 class Root extends React.Component {
+  static propTypes = {
+    hasAppState: React.PropTypes.bool,
+    children: React.PropTypes.node
+  }
   render() {
     return (
       <div style={rootContainerStyle}>
         <div style={titleStyle}>
           Welcome to the Gonfalon Sports Book!
         </div>
-        <LiveProps />
+        {
+          this.props.hasAppState
+            ? this.props.children
+            : null
+        }
       </div>
     );
   }
