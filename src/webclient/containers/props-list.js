@@ -3,18 +3,20 @@ const React = require('react');
 const {connect} = require('react-redux');
 const autobind = require('autobind-decorator');
 const socket = require('../socket');
-const LiveProp = require('../components/live-prop');
+const AdminPropGroupControls = require('../components/admin-prop-group-controls');
 const {ADD_PROP} = require('../../shared/action-types');
 const {createRandomId} = require('../../shared/utils');
 
 const {PropTypes} = React;
 @connect(({app}) => ({
-  liveProps: app.liveProps
+  propItems: app.propItems,
+  isAdmin: true // TODO: will be based on auth in the future, and should have resulting actions verified.
 }))
 @autobind
 class LiveProps extends React.Component {
   static propTypes = {
-    liveProps: PropTypes.arrayOf(PropTypes.object)
+    propItems: PropTypes.arrayOf(PropTypes.object),
+    isAdmin: PropTypes.bool
   }
 
   state = {
@@ -47,17 +49,14 @@ class LiveProps extends React.Component {
     return (
       <div style={containerStyle}>
         <div>Current Props</div>
-        <div>
-          <input
-            type="text"
-            value={this.state.newPropDescription}
-            onChange={this.handleNewPropInput}
-          />
-          <button onClick={this.handleSubmitNewProp}>Add Prop</button>
-        </div>
         {
-          this.props.liveProps.map(({id, description}) =>
-            <LiveProp key={id} description={description} />
+          this.props.isAdmin
+            ? <AdminPropGroupControls />
+            : null
+        }
+        {
+          this.props.propItems.map(({id, description}) =>
+            <div key={id}>{description}</div>
           )
         }
       </div>

@@ -8,7 +8,7 @@ function appReducer(state, action) {
       const {id, description} = payload;
       return Object.assign({}, state, {
         app: {
-          liveProps: [...state.app.liveProps, {id, description}]
+          propItems: [...state.app.propItems, {id, description}]
         }
       });
     }

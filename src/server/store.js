@@ -4,7 +4,7 @@ const reducer = require('./reducer');
 
 const initialAppState = {
   app: {
-    liveProps: []
+    propItems: []
   }
 };
 
