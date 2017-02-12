@@ -61,6 +61,7 @@ class LiveProps extends React.Component {
             <ReadonlyPropGroup
               key={pg.id}
               operator={pg.operator}
+              interest={pg.interest}
               includedProps={pg.includedProps}
             />
           )
@@ -80,18 +81,26 @@ const containerStyle = {
 
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
-    operator: PropTypes.oneOf(_.values(propGroupOperators)),
+    operator: PropTypes.oneOf(_.values(propGroupOperators)).isRequired,
+    interest: PropTypes.number.isRequired,
     includedProps: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.number,
       description: PropTypes.string,
       startingLine: PropTypes.number
-    }))
+    })).isRequired
   }
 
   render() {
     return (
       <div style={propGroupContainerStyle}>
         <div style={operatorStyle}>{this.props.operator}</div>
+        <div style={interestStyle}>
+          {
+            this.props.interest > 0
+              ?  'Interest ' + this.props.interest * 100 + '%'
+              : 'No interest'
+          }
+        </div>
         {
           this.props.includedProps.map(({id, description, startingLine}) =>
             <div key={id} style={propRowStyle}>
@@ -112,17 +121,26 @@ const propGroupContainerStyle = {
   paddingTop: '20px'
 };
 
+const leftSpacing = '15px';
+const topSpacing = '10px';
+
 const propRowStyle = {
   display: 'flex',
   flexDirection: 'row',
-  padding: '10px 0 0 10px'
+  paddingLeft: leftSpacing,
+  paddingTop: topSpacing
 };
 
 const propItemStyle = {
-  marginLeft: '5px',
-  marginRight: '5px'
+  marginRight: '10px'
 };
 
 const operatorStyle = {
   fontWeight: '400'
+};
+
+const interestStyle = {
+  paddingLeft: leftSpacing,
+  paddingTop: topSpacing,
+  color: '#777'
 };

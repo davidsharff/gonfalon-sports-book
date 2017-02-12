@@ -12,6 +12,7 @@ const initialAppState = {
       {
         id: 1234,
         operator: propGroupOperators.FIRST_TO_OCCUR,
+        interest: .05,
         includedProps: [
           {
             id: 6,
@@ -28,6 +29,7 @@ const initialAppState = {
       {
         id: 190837,
         operator: propGroupOperators.FIRST_TO_OCCUR,
+        interest: 0,
         includedProps: [
           {
             id: 4,
@@ -44,6 +46,7 @@ const initialAppState = {
       {
         id: 2309487,
         operator: propGroupOperators.GREATER,
+        interest: .02,
         includedProps: [
           {
             id: 2,
