@@ -12,9 +12,11 @@ const store = require('./store');
 const Root = require('./containers/Root');
 const socket = require('./socket');
 const history = require('./history');
-
+const AuthService = require('./auth-service');
 const NotFound  = require('./containers/not-found');
 const PropsList = require('./containers/props-list'); // TODO: pedantic, but should probably be "prop-list"
+
+const auth = new AuthService('iLsffrD705FgUGVPTgYryl5ga0Ey5CUG', 'gonfalon-sports-book.auth0.com');
 
 socket.onMessage(({data: action}) => store.dispatch(JSON.parse(action)));
 
@@ -22,7 +24,7 @@ socket.onMessage(({data: action}) => store.dispatch(JSON.parse(action)));
 ReactDOM.render((
   <Provider store={store}>
     <Router history={history}>
-      <Route path="/" component={Root}>
+      <Route path="/" component={Root} auth={auth}>
         <Route path="props" component={PropsList} />
         <Route path="*" component={NotFound} />
       </Route>

@@ -6,8 +6,12 @@ const styles = require('../styles');
 
 
 class HeaderBar extends React.Component {
+  static propTypes = {
+    isAuthenticated: React.PropTypes.bool.isRequired,
+    onLogin: React.PropTypes.func,
+    onLogout: React.PropTypes.func
+  };
   render() {
-    // TODO: use router link components
     return (
       <div style={rowStyle}>
         <div style={mainTitleStyle}>
@@ -17,7 +21,11 @@ class HeaderBar extends React.Component {
           <Link style={linkActiveStyle} to="props">Props</Link>
           <Link style={linkDisabledStyle} to="/" disabled>Live Bets</Link>
           <Link style={linkDisabledStyle} to="/">About</Link>
-          <Link style={linkDisabledStyle} to="/">Logout</Link>
+          {
+            this.props.isAuthenticated
+              ? <div style={linkActiveStyle} onClick={this.props.onLogout}>Logout</div>
+              : <div style={linkActiveStyle} onClick={this.props.onLogin}>Login</div>
+          }
         </div>
       </div>
     );
