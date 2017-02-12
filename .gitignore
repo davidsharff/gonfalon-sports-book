@@ -4,3 +4,4 @@ npm-debug.log
 .gitignore
 .idea/
 public/
+.DS_Store

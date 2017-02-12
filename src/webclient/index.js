@@ -13,17 +13,17 @@ const Root = require('./containers/Root');
 const socket = require('./socket');
 const history = require('./history');
 
-
 const NotFound  = require('./containers/not-found');
-const LiveProps = require('./containers/live-props');
+const PropsList = require('./containers/props-list'); // TODO: pedantic, but should probably be "prop-list"
 
 socket.onMessage(({data: action}) => store.dispatch(JSON.parse(action)));
 
+// TODO: one day we may want to "hot swap" routes based on admin privelages (to prevent nefarious actions)
 ReactDOM.render((
   <Provider store={store}>
     <Router history={history}>
       <Route path="/" component={Root}>
-        <Route path="live-props" component={LiveProps} />
+        <Route path="props" component={PropsList} />
         <Route path="*" component={NotFound} />
       </Route>
     </Router>
