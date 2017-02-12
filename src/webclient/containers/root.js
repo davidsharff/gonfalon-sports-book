@@ -2,6 +2,7 @@
 const React = require('react');
 const {connect} = require('react-redux');
 const _ = require('lodash');
+const HeaderBar = require('../components/header-bar');
 
 @connect(({app}) => ({
   hasAppState: !_.isEmpty(app)
@@ -14,9 +15,7 @@ class Root extends React.Component {
   render() {
     return (
       <div style={rootContainerStyle}>
-        <div style={titleStyle}>
-          Welcome to the Gonfalon Sports Book!
-        </div>
+        <HeaderBar />
         {
           this.props.hasAppState
             ? this.props.children
@@ -34,9 +33,4 @@ const rootContainerStyle = {
   flexDirection: 'column',
   fontFamily: 'Helvetica Neue,Helvetica,Arial,sans-serif',
   fontWeight: '300'
-};
-
-// TODO: move common shared styles into styles.js
-const titleStyle = {
-  padding: '10px'
 };
