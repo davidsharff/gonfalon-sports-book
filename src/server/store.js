@@ -5,24 +5,24 @@ const {propGroupOperators} = require('../shared/constants');
 
 const initialAppState = {
   app: {
-    // TODO: use to id individual props within groups. Makes it easier to refer to specific prop outside of app.
-    // TODO: the id can be assigned in the reducer and this count incremented as part of the same action.
-    //latestPropCount: 0,
     propGroups: [
       {
         id: 1234,
         operator: propGroupOperators.FIRST_TO_OCCUR,
         interest: .05,
+        isActive: true,
         includedProps: [
           {
             id: 6,
             description: 'Colonel Sanders is promoted to Brigadier General',
-            startingLine: 250
+            startingLine: 250,
+            isActive: true
           },
           {
             id: 5,
-            description: 'Nolan Ryan throws ceremonial first pitch of Astros game and exceeds 80mph',
-            startingLine: -110
+            description: 'Nolan Ryan throws ceremonial first pitch of Astros game and exceeds 80 mph',
+            startingLine: -110,
+            isActive: true
           }
         ]
       },
@@ -30,16 +30,19 @@ const initialAppState = {
         id: 190837,
         operator: propGroupOperators.FIRST_TO_OCCUR,
         interest: 0,
+        isActive: true,
         includedProps: [
           {
             id: 4,
-            description: 'Dennis Rodman becomes an official ambassador, for any UN member nation, to the DPRK',
-            startingLine: 125
+            description: 'Dennis Rodman becomes an official ambassador, for any UN member state, to the DPRK',
+            startingLine: 125,
+            isActive: true
           },
           {
             id: 3,
             description: 'United States goverment confirms existence of intelligent alien species',
-            startingLine: -140
+            startingLine: -140,
+            isActive: true
           }
         ]
       },
@@ -47,16 +50,19 @@ const initialAppState = {
         id: 2309487,
         operator: propGroupOperators.GREATER,
         interest: .02,
+        isActive: true,
         includedProps: [
           {
             id: 2,
             description: 'Total new companies founded by Elon Musk in 2017',
-            startingLine: 105
+            startingLine: 105,
+            isActive: true
           },
           {
             id: 1,
             description: 'Total NFL games ending in a tie during the entire 2017 regular season',
-            startingLine: -120
+            startingLine: -120,
+            isActive: true
           }
         ]
       }

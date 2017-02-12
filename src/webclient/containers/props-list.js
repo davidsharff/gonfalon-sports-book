@@ -5,9 +5,9 @@ const autobind = require('autobind-decorator');
 const _ = require('lodash');
 const socket = require('../socket');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
-const {ADD_PROP} = require('../../shared/action-types');
+const {ADD_NEW_PROP_GROUP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
-const {propGroupOperators} = require('../../shared/constants');
+const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
 
 const {PropTypes} = React;
 @connect(({app}) => ({
@@ -21,30 +21,13 @@ class LiveProps extends React.Component {
     isAdmin: PropTypes.bool
   }
 
-  state = {
-    newPropDescription: null
-  }
-
-  handleNewPropInput(e) {
-    this.setState({
-      newPropDescription: e.target.value
+  handleSavePropGroup(propGroup) {
+    socket.sendAction({
+      type: ADD_NEW_PROP_GROUP,
+      payload: Object.assign({}, propGroup, {
+        id: utils.createRandomId()
+      })
     });
-  }
-
-  handleSubmitNewProp(e) {
-    e.preventDefault();
-    if (this.state.newPropDescription) {
-      socket.sendAction({
-        type: ADD_PROP,
-        payload: {
-          id: utils.createRandomId(),
-          description: this.state.newPropDescription
-        }
-      });
-      this.setState({
-        newPropDescription: null
-      });
-    }
   }
 
   render() {
@@ -53,17 +36,20 @@ class LiveProps extends React.Component {
       <div style={containerStyle}>
         {
           this.props.isAdmin
-            ? <AdminPropGroupControls />
+            ? <AdminPropGroupControls
+                onSave={this.handleSavePropGroup}
+              />
             : null
         }
         {
-          this.props.propGroups.map((pg) =>
-            <ReadonlyPropGroup
-              key={pg.id}
-              operator={pg.operator}
-              interest={pg.interest}
-              includedProps={pg.includedProps}
-            />
+          this.props.propGroups.map((pg, i) =>
+          <ReadonlyPropGroup
+            key={pg.id}
+            groupNumber={this.props.propGroups.length - i}
+            operator={pg.operator}
+            interest={pg.interest}
+            includedProps={pg.includedProps}
+          />
           )
         }
       </div>
@@ -71,16 +57,17 @@ class LiveProps extends React.Component {
   }
 }
 
-module.exports = LiveProps;
-
 const containerStyle = {
   display: 'flex',
   flexDirection: 'column',
   padding: '10px'
 };
 
+module.exports = LiveProps;
+
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
+    groupNumber: PropTypes.number.isRequired,
     operator: PropTypes.oneOf(_.values(propGroupOperators)).isRequired,
     interest: PropTypes.number.isRequired,
     includedProps: PropTypes.arrayOf(PropTypes.shape({
@@ -91,20 +78,16 @@ class ReadonlyPropGroup extends React.Component {
   }
 
   render() {
+    // TODO: use selector to get line value
     return (
       <div style={propGroupContainerStyle}>
+        <div style={groupLabelStyle}>Group {this.props.groupNumber}</div>
+        <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         <div style={operatorStyle}>{this.props.operator}</div>
-        <div style={interestStyle}>
-          {
-            this.props.interest > 0
-              ?  'Interest ' + this.props.interest * 100 + '%'
-              : 'No interest'
-          }
-        </div>
         {
-          this.props.includedProps.map(({id, description, startingLine}) =>
+          this.props.includedProps.map(({id, description, startingLine}, index) =>
             <div key={id} style={propRowStyle}>
-              <div style={propItemStyle}>{utils.padLeft(id, '00', 3)}</div>
+              <div style={propItemStyle}>{multipleChoiceLabels[index]})</div>
               <div style={propItemStyle}>{description}</div>
               <div style={propItemStyle}>{(startingLine > 0 ? '+' : '') + startingLine}</div>
             </div>
@@ -115,32 +98,41 @@ class ReadonlyPropGroup extends React.Component {
   }
 }
 
+const topSpacing = '10px';
+
 const propGroupContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
-  paddingTop: '20px'
+  paddingBottom: '20px'
 };
 
-const leftSpacing = '15px';
-const topSpacing = '10px';
+const groupLabelStyle = {
+  fontWeight: '400',
+  paddingBotton: '5px'
+};
 
 const propRowStyle = {
   display: 'flex',
   flexDirection: 'row',
-  paddingLeft: leftSpacing,
-  paddingTop: topSpacing
+  paddingTop: topSpacing,
+  paddingLeft: '15px'
 };
 
 const propItemStyle = {
   marginRight: '10px'
 };
 
-const operatorStyle = {
-  fontWeight: '400'
-};
-
 const interestStyle = {
-  paddingLeft: leftSpacing,
   paddingTop: topSpacing,
   color: '#777'
 };
+
+const operatorStyle = {
+  paddingTop: '10px'
+};
+
+function formatInterestValue(interest) {
+  return interest > 0
+    ?  'Interest ' + interest * 100 + '%'
+    : 'No interest';
+}

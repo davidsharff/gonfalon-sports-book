@@ -4,11 +4,13 @@ const actionTypes = require('../shared/action-types');
 function appReducer(state, action) {
   const {payload} = action;
   switch (action.type) {
-    case actionTypes.ADD_PROP: {
-      const {id, description} = payload;
+    case actionTypes.ADD_NEW_PROP_GROUP: {
       return Object.assign({}, state, {
         app: {
-          propItems: [...state.app.propItems, {id, description}]
+          propGroups: [
+            payload, // Prepending because of "newest first" nature of displays.
+            ...state.app.propGroups
+          ]
         }
       });
     }
