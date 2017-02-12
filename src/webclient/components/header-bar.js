@@ -45,7 +45,7 @@ const linksContainerStyle = {
 };
 
 const linkItemStyle = {
-  margin: '0 5px 0px 5px'
+  marginLeft: '15px'
 };
 
 const linkActiveStyle =  Object.assign({}, linkItemStyle, styles.linkActive);
