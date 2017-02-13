@@ -2,10 +2,12 @@
 const {createStore, combineReducers, applyMiddleware} = require('redux');
 const {routeReducer, syncHistory} = require('react-router-redux');
 const history = require('./history');
-const reducer = require('./reducer');
+const appStateReducer = require('./reducers/app-state-reducer');
+const localStateReducer = require('./reducers/local-state-reducer');
 
 const combinedReducers = combineReducers({
-  app: reducer,
+  app: appStateReducer,
+  local: localStateReducer,
   routing: routeReducer
 });
 

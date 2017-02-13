@@ -2,6 +2,7 @@
 const autobind = require('autobind-decorator');
 const {routeActions} = require('react-router-redux');
 const store = require('./store');
+const {SET_IS_ADMIN} = require('./action-types');
 
 class AuthService {
   constructor(clientId, domain) {
@@ -10,42 +11,64 @@ class AuthService {
       redirectUrl: 'http://localhost:8080', // TODO: add prod support
       responseType: 'token'
     });
-
     this.lock.on('authenticated', this._doAuthentication.bind(this));
   }
 
   _doAuthentication(authResult) {
-    // Saves the user token
     this.setToken(authResult.idToken);
-    // navigate to index
+
+    localStorage.setItem('access_token', authResult.accessToken);
+
+    this.setIsAdminPerAuthProfile();
+
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
+  setIsAdminPerAuthProfile() {
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+      return;
+    }
+    this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      store.dispatch({
+        type: SET_IS_ADMIN,
+        payload: profile.app_metadata.admin
+      });
+    });
+  }
+
   login() {
-    // Call the show method to display the widget.
     this.lock.show();
   }
 
   loggedIn() {
-    // Checks if there is a saved token and it's still valid
     return !!this.getToken();
   }
 
   setToken(idToken) {
-    // Saves user token to local storage
     localStorage.setItem('id_token', idToken);
   }
 
   getToken() {
-    // Retrieves the user token from local storage
     return localStorage.getItem('id_token');
   }
 
   logout() {
-    // Clear user token and profile data from local storage
     localStorage.removeItem('id_token');
+    localStorage.removeItem('access_token');
+
+    store.dispatch({
+      type: SET_IS_ADMIN,
+      payload: false
+    });
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
+
+
 
 }
 

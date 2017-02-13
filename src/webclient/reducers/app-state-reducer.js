@@ -1,7 +1,7 @@
 'use strict';
 const {
   SET_NEW_APP_STATE
-} = require('../shared/action-types');
+} = require('../../shared/action-types');
 
 function reducer(state={}, action) {
   switch (action.type) {

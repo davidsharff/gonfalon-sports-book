@@ -12,14 +12,15 @@ class HeaderBar extends React.Component {
     onLogout: React.PropTypes.func
   };
   render() {
+    // TODO: the admin/props link keeps appending to the url.
     return (
       <div style={rowStyle}>
         <div style={mainTitleStyle}>
           Gonfalon Sportsbook
         </div>
         <div style={linksContainerStyle}>
-          <Link style={linkActiveStyle} to="props">Props</Link>
-          <Link style={linkDisabledStyle} to="/" disabled>Live Bets</Link>
+          <Link style={linkActiveStyle} to="/props">Props</Link>
+          <Link style={linkDisabledStyle} to="/">Live Bets</Link>
           <Link style={linkDisabledStyle} to="/">About</Link>
           {
             this.props.isAuthenticated
