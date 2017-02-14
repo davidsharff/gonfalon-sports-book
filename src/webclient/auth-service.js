@@ -2,7 +2,8 @@
 const autobind = require('autobind-decorator');
 const {routeActions} = require('react-router-redux');
 const store = require('./store');
-const {SET_IS_ADMIN} = require('./action-types');
+const {NOTIFY_AUTHENTICATION} = require('../shared/action-types');
+const socket = require('./socket');
 
 class AuthService {
   constructor(clientId, domain) {
@@ -19,24 +20,23 @@ class AuthService {
 
     localStorage.setItem('access_token', authResult.accessToken);
 
-    this.setIsAdminPerAuthProfile();
+    this._sendServerAuthDetails();
 
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
-  setIsAdminPerAuthProfile() {
-    const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) {
-      return;
-    }
+  _sendServerAuthDetails() {
     this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
       if (error) {
         console.error(error);
         return;
       }
-      store.dispatch({
-        type: SET_IS_ADMIN,
-        payload: profile.app_metadata.admin
+      socket.sendAction({
+        type: NOTIFY_AUTHENTICATION,
+        payload: {
+          userId: profile.user_id,
+          email: profile.email
+        }
       });
     });
   }
@@ -61,10 +61,6 @@ class AuthService {
     localStorage.removeItem('id_token');
     localStorage.removeItem('access_token');
 
-    store.dispatch({
-      type: SET_IS_ADMIN,
-      payload: false
-    });
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 

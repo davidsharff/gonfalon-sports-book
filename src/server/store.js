@@ -5,6 +5,7 @@ const {propGroupOperators} = require('../shared/constants');
 
 const initialAppState = {
   app: {
+    users: [],
     propGroups: [
       {
         id: 1234,

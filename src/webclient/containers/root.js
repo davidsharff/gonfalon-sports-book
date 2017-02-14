@@ -5,7 +5,7 @@ const _ = require('lodash');
 const HeaderBar = require('../components/header-bar');
 
 @connect(({app, local}, {route: {auth}}) => ({
-  isAdmin: local.isAdmin,
+  isAdmin: false, // TODO
   isAuthenticated: auth.loggedIn(),
   handleLogin: auth.login,
   handleLogout: auth.logout,

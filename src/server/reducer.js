@@ -19,7 +19,7 @@ function appReducer(state, action) {
       return state;
     }
     default:
-      throw new Error(`Unknown action: ${action}`);
+      throw new Error(`Unknown action: ${JSON.stringify(action)}`);
   }
 }
 

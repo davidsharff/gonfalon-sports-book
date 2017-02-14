@@ -18,11 +18,9 @@ const PropList = require('./containers/prop-list');
 
 const auth = new AuthService('iLsffrD705FgUGVPTgYryl5ga0Ey5CUG', 'gonfalon-sports-book.auth0.com');
 
-auth.setIsAdminPerAuthProfile();
-
 socket.onMessage(({data: action}) => store.dispatch(JSON.parse(action)));
 
-// TODO: one day we may want to "hot swap" routes based on admin privelages (to prevent nefarious actions)
+// TODO: one day we may want to protect routes based on admin privelages (to prevent nefarious actions)
 ReactDOM.render((
   <Provider store={store}>
     <Router history={history}>

@@ -12,7 +12,6 @@ class HeaderBar extends React.Component {
     onLogout: React.PropTypes.func
   };
   render() {
-    // TODO: the admin/props link keeps appending to the url.
     return (
       <div style={rowStyle}>
         <div style={mainTitleStyle}>

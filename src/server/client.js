@@ -3,7 +3,8 @@ const autobind = require('autobind-decorator');
 const store = require('./store');
 
 const {
-  SET_NEW_APP_STATE
+  SET_NEW_APP_STATE,
+  NOTIFY_AUTHENTICATION
 } = require('../shared/action-types');
 
 let clients = [];
@@ -14,6 +15,7 @@ class Client {
     this._ws.on('message', this._onMessage);
     this._ws.on('close', this._onClose);
     this.sendCurrentState();
+    this._userId = null;
   }
 
   sendCurrentState() {
@@ -32,9 +34,15 @@ class Client {
   }
 
   _onMessage(action) {
-    console.log(`Action: ${action}`);
     // TODO: ensure it is a valid action type.
-    store.dispatch(JSON.parse(action));
+    console.log(`Action: ${action}`);
+    action = JSON.parse(action);
+    if (action.type === NOTIFY_AUTHENTICATION) { // TODO: move to middleware
+      this._userId = action.payload.userId;
+      return;
+    }
+
+    store.dispatch(action);
     broadcastNewAppState();
   }
 
