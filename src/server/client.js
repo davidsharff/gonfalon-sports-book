@@ -1,4 +1,5 @@
 'use strict';
+const fs = require('fs');
 const _ = require('lodash');
 const autobind = require('autobind-decorator');
 const store = require('./store');
@@ -44,6 +45,7 @@ class Client {
 
     if (hasPermission(action.type, this.getUserId())) {
       store.dispatch(action);
+      fs.writeFile('app-state.json', JSON.stringify(store.getState()));
       broadcastNewAppState();
     } else {
       console.error(`Invalid permission. UserId: ${this.getUserId()}`);
