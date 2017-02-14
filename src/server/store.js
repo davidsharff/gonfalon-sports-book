@@ -1,9 +1,13 @@
 'use strict';
 const {createStore} = require('redux');
-const reducer = require('./reducer');
+const appStateReducer = require('./reducers/app-state-reducer');
+const localStateReducer = require('./reducers/local-state-reducer');
 const {propGroupOperators} = require('../shared/constants');
 
 const initialAppState = {
+  local: {
+    authUsers: []
+  },
   app: {
     users: [],
     propGroups: [
@@ -71,6 +75,13 @@ const initialAppState = {
   }
 };
 
-const store = createStore(reducer, initialAppState);
+const store = createStore(createReducer, initialAppState);
 
 module.exports = store;
+
+function createReducer(state, action) {
+  return {
+    app: appStateReducer(state.app, action),
+    local: localStateReducer(state.local, action)
+  };
+}

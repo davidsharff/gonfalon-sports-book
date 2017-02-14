@@ -1,11 +1,13 @@
 'use strict';
+const _ = require('lodash');
 const autobind = require('autobind-decorator');
 const store = require('./store');
-
+const {ADD_NEW_USER_ID, ADD_NEW_USER} = require('./action-types');
 const {
   SET_NEW_APP_STATE,
   NOTIFY_AUTHENTICATION
 } = require('../shared/action-types');
+const {STARTING_BUBBLES} = require('../shared/constants');
 
 let clients = [];
 class Client {
@@ -38,7 +40,7 @@ class Client {
     console.log(`Action: ${action}`);
     action = JSON.parse(action);
     if (action.type === NOTIFY_AUTHENTICATION) { // TODO: move to middleware
-      this._userId = action.payload.userId;
+      this._handleAuthentication(action.payload.userId, action.payload.email);
       return;
     }
 
@@ -49,6 +51,39 @@ class Client {
   _onClose() {
     this._ws = null;
     clients = clients.filter((c) => c !== this);
+  }
+
+  _handleAuthentication(userId, email) {
+    const {authUsers} = store.getState().local;
+    const authUser = _.find(authUsers, {userId});
+    if (!authUser) {
+      console.log('adding user details');
+      store.dispatch({
+        type: ADD_NEW_USER_ID,
+        payload: {
+          email,
+          userId
+        }
+      });
+      store.dispatch({
+        type: ADD_NEW_USER,
+        payload: {
+          email,
+          startingBubbles: STARTING_BUBBLES
+        }
+      });
+    }
+  }
+
+  _setUserId(userId) {
+    if (!userId) {
+      throw new Error('Must provided userId. To clear, use _clearUserId() instead');
+    }
+    this._userId = userId;
+  }
+
+  _clearUserId() {
+    this._userId = null;
   }
 }
 

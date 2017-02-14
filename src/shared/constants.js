@@ -5,5 +5,6 @@ module.exports = {
     GREATER: 'Greater',
     FIRST_TO_OCCUR: '1st to Occur'
   },
-  multipleChoiceLabels: ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+  multipleChoiceLabels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+  STARTING_BUBBLES: 1000
 };
