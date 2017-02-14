@@ -1,21 +1,23 @@
 'use strict';
 const React = require('react');
 const {connect} = require('react-redux');
-const autobind = require('autobind-decorator');
 const _ = require('lodash');
-const socket = require('../socket');
+const autobind = require('autobind-decorator');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
+const socket = require('../socket');
 const {ADD_NEW_PROP_GROUP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
+const {adminEmails} = require('../../shared/constants');
 
 const {PropTypes} = React;
 @connect(({app}) => ({
   propGroups: app.propGroups,
-  isAdmin: true // TODO: will be based on auth in the future, and should have resulting actions verified.
+  // Easily spoofed but all admin actions verified on server.
+  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1
 }))
 @autobind
-class LiveProps extends React.Component {
+class PropList extends React.Component {
   static propTypes = {
     propGroups: PropTypes.arrayOf(PropTypes.object),
     isAdmin: PropTypes.bool
@@ -30,15 +32,15 @@ class LiveProps extends React.Component {
     });
   }
 
+
   render() {
-    // TODO: newest first default sort.
     return (
       <div style={containerStyle}>
         {
           this.props.isAdmin
-            ? <AdminPropGroupControls
-                onSave={this.handleSavePropGroup}
-              />
+              ? <AdminPropGroupControls
+                  onSave={this.handleSavePropGroup}
+                />
             : null
         }
         {
@@ -63,7 +65,7 @@ const containerStyle = {
   padding: '10px'
 };
 
-module.exports = LiveProps;
+module.exports = PropList;
 
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {

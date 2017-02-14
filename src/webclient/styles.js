@@ -5,7 +5,8 @@ const baseLink = {
 
 module.exports = {
   linkActive: Object.assign({}, baseLink, {
-    color: '#22527b'
+    color: '#22527b',
+    cursor: 'pointer'
   }),
   linkDisabled:  Object.assign({}, baseLink, {
     cursor: 'default',

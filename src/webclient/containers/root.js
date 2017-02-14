@@ -4,18 +4,28 @@ const {connect} = require('react-redux');
 const _ = require('lodash');
 const HeaderBar = require('../components/header-bar');
 
-@connect(({app}) => ({
+@connect(({app}, {route: {auth}}) => ({
+  isAuthenticated: auth.loggedIn(),
+  handleLogin: auth.login,
+  handleLogout: auth.logout,
   hasAppState: !_.isEmpty(app)
 }))
 class Root extends React.Component {
   static propTypes = {
     hasAppState: React.PropTypes.bool,
-    children: React.PropTypes.node
+    children: React.PropTypes.node,
+    isAuthenticated: React.PropTypes.bool,
+    handleLogin: React.PropTypes.func,
+    handleLogout: React.PropTypes.func
   }
   render() {
     return (
       <div style={rootContainerStyle}>
-        <HeaderBar />
+        <HeaderBar
+          isAuthenticated={this.props.isAuthenticated}
+          onLogin={this.props.handleLogin}
+          onLogout={this.props.handleLogout}
+        />
         {
           this.props.hasAppState
             ? this.props.children
