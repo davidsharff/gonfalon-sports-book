@@ -62,7 +62,7 @@ class Client {
     const {authUsers} = store.getState().local;
     const authUser = _.find(authUsers, {userId});
     if (!authUser) {
-      console.log('adding user details');
+      console.log(`New user: ${email}`);
       store.dispatch({
         type: ADD_NEW_USER_ID,
         payload: {
