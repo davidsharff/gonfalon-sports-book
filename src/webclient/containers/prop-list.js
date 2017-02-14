@@ -8,11 +8,13 @@ const socket = require('../socket');
 const {ADD_NEW_PROP_GROUP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
+const {adminEmails} = require('../../shared/constants');
 
 const {PropTypes} = React;
-@connect(({app, local}) => ({
+@connect(({app}) => ({
   propGroups: app.propGroups,
-  isAdmin: local.isAdmin // TODO: will be based on auth in the future, and should have resulting actions verified.
+  // Easily spoofed but all admin actions verified on server.
+  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1
 }))
 @autobind
 class PropList extends React.Component {

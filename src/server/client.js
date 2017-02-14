@@ -3,11 +3,8 @@ const _ = require('lodash');
 const autobind = require('autobind-decorator');
 const store = require('./store');
 const {ADD_NEW_USER_ID, ADD_NEW_USER} = require('./action-types');
-const {
-  SET_NEW_APP_STATE,
-  NOTIFY_AUTHENTICATION
-} = require('../shared/action-types');
-const {STARTING_BUBBLES} = require('../shared/constants');
+const sharedActionTypes = require('../shared/action-types');
+const {STARTING_BUBBLES, adminEmails} = require('../shared/constants');
 
 let clients = [];
 class Client {
@@ -22,7 +19,7 @@ class Client {
 
   sendCurrentState() {
     this._send({
-      type: SET_NEW_APP_STATE,
+      type: sharedActionTypes.SET_NEW_APP_STATE,
       payload: store.getState().app
     });
   }
@@ -39,13 +36,18 @@ class Client {
     // TODO: ensure it is a valid action type.
     console.log(`Action: ${action}`);
     action = JSON.parse(action);
-    if (action.type === NOTIFY_AUTHENTICATION) { // TODO: move to middleware
+
+    // TODO: move these middleware things to middleware
+    if (action.type === sharedActionTypes.NOTIFY_AUTHENTICATION) {
       this._handleAuthentication(action.payload.userId, action.payload.email);
-      return;
     }
 
-    store.dispatch(action);
-    broadcastNewAppState();
+    if (hasPermission(action.type, this.getUserId())) {
+      store.dispatch(action);
+      broadcastNewAppState();
+    } else {
+      console.error(`Invalid permission. UserId: ${this.getUserId()}`);
+    }
   }
 
   _onClose() {
@@ -54,6 +56,7 @@ class Client {
   }
 
   _handleAuthentication(userId, email) {
+    this._setUserId(userId);
     const {authUsers} = store.getState().local;
     const authUser = _.find(authUsers, {userId});
     if (!authUser) {
@@ -75,6 +78,10 @@ class Client {
     }
   }
 
+  getUserId() {
+    return this._userId;
+  }
+
   _setUserId(userId) {
     if (!userId) {
       throw new Error('Must provided userId. To clear, use _clearUserId() instead');
@@ -91,4 +98,15 @@ module.exports = autobind(Client);
 
 function broadcastNewAppState() {
   clients.forEach((c) => c.sendCurrentState());
+}
+
+function hasPermission(actionType, userId) {
+  const adminActions = [sharedActionTypes.ADD_NEW_PROP_GROUP];
+  if (adminActions.indexOf(actionType) > -1) {
+    const authUser = _.find(store.getState().local.authUsers, {userId});
+    if (!authUser || adminEmails.indexOf(authUser.email) === -1) {
+      return false;
+    }
+  }
+  return true;
 }

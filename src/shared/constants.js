@@ -6,5 +6,8 @@ module.exports = {
     FIRST_TO_OCCUR: '1st to Occur'
   },
   multipleChoiceLabels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
-  STARTING_BUBBLES: 1000
+  STARTING_BUBBLES: 1000,
+  adminEmails: [
+    'davesharff@gmail.com'
+  ]
 };

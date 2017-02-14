@@ -4,8 +4,7 @@ const {connect} = require('react-redux');
 const _ = require('lodash');
 const HeaderBar = require('../components/header-bar');
 
-@connect(({app, local}, {route: {auth}}) => ({
-  isAdmin: false, // TODO
+@connect(({app}, {route: {auth}}) => ({
   isAuthenticated: auth.loggedIn(),
   handleLogin: auth.login,
   handleLogout: auth.logout,

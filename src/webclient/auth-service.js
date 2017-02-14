@@ -20,6 +20,14 @@ class AuthService {
 
     localStorage.setItem('access_token', authResult.accessToken);
 
+    this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      localStorage.setItem('email', profile.email);
+    });
+
     this._sendServerAuthDetails();
 
     store.dispatch(routeActions.replace({pathName: '/'}));
@@ -55,6 +63,10 @@ class AuthService {
 
   getToken() {
     return localStorage.getItem('id_token');
+  }
+
+  getEmail() {
+    return localStorage.getItem('email');
   }
 
   logout() {
