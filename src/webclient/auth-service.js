@@ -28,12 +28,12 @@ class AuthService {
       localStorage.setItem('email', profile.email);
     });
 
-    this._sendServerAuthDetails();
+    this.sendServerAuthDetails();
 
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
-  _sendServerAuthDetails() {
+  sendServerAuthDetails() {
     this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
       if (error) {
         console.error(error);

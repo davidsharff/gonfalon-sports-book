@@ -9,7 +9,6 @@ const combinedReducers = combineReducers({
   routing: routeReducer
 });
 
-
 const reduxRouterMiddleware = syncHistory(history);
 const createStoreWithMiddleware = applyMiddleware(reduxRouterMiddleware)(createStore);
 
