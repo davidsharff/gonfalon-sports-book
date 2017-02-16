@@ -91,6 +91,7 @@ const containerStyle = {
 
 module.exports = PropList;
 
+// TODO: move to component directory
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
@@ -155,6 +156,11 @@ class IncludedProp extends React.Component {
     });
   }
 
+  handlePlaceBet(bubbles) {
+    this.props.onPlaceBet(bubbles);
+    this.handleToggleBetInput();
+  }
+
   render() {
     const {props} = this;
     return (
@@ -171,7 +177,7 @@ class IncludedProp extends React.Component {
            this.state.isInputtingBet
             ? <PropBetInput
                 alignmentStyle={{paddingLeft: '15px'}}
-                onPlaceBet={this.props.onPlaceBet}
+                onPlaceBet={this.handlePlaceBet}
                 onCancel={this.handleToggleBetInput}
                 currentBubbleBalance={0}
               />
