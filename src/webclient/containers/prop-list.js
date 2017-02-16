@@ -42,13 +42,12 @@ class PropList extends React.Component {
     });
   }
 
-  handlePlaceBet(propGroupId, propId, effectiveLine, bubbles) {
+  handlePlaceBet(propGroupId, propId, bubbles) {
     socket.sendAction({
       type: PLACE_BET,
       payload: {
         propGroupId,
         propId,
-        effectiveLine,
         bubbles
       }
     });
@@ -125,7 +124,7 @@ class ReadonlyPropGroup extends React.Component {
               choiceLabel={multipleChoiceLabels[index]}
               isLoggedIn={this.props.isLoggedIn}
               onPlaceBet={(bubbles) =>
-                this.props.onPlaceBet(this.props.id, propId, currentLine, parseFloat(bubbles))
+                this.props.onPlaceBet(this.props.id, propId, parseFloat(bubbles))
               }
             />
           )

@@ -34,7 +34,10 @@ class PropBetInput extends React.Component {
           <div style={balanceLabelStyle}>Balance: {this.props.currentBubbleBalance} bubbles</div>
         </div>
         <div style={{display: 'flex', flexDirection: 'row'}}>
-          <button disabled={!state.bubbleInputValue} onClick={() => this.props.onPlaceBet(state.bubbleInputValue)}>
+          <button
+            disabled={!state.bubbleInputValue || state.bubbleInputValue < 0}
+            onClick={() => this.props.onPlaceBet(state.bubbleInputValue)}
+          >
             Place Bet
           </button>
           <button onClick={this.props.onCancel} style={{marginLeft: '5px'}}>Cancel</button>
