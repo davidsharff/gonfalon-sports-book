@@ -8,8 +8,16 @@ function appReducer(app, action) {
     case sharedActionTypes.ADD_NEW_PROP_GROUP: {
       return Object.assign({}, app, {
         propGroups: [
-          payload, // Prepending because of "newest first" nature of displays.
+          payload,
           ...app.propGroups
+        ]
+      });
+    }
+    case sharedActionTypes.PLACE_BET: {
+      return Object.assign({}, app, {
+        bets: [
+          payload,
+          ...app.bets
         ]
       });
     }

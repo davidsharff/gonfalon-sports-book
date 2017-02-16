@@ -7,13 +7,13 @@ const socket = require('../socket');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
 const PropBetInput = require('../components/prop-bet-input');
 const {calcCurrentPropLine} = require('../../shared/selectors');
-const {ADD_NEW_PROP_GROUP} = require('../../shared/action-types');
+const {ADD_NEW_PROP_GROUP, PLACE_BET} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
 const {adminEmails} = require('../../shared/constants');
 
 const {PropTypes} = React;
-@connect(({app}) => ({
+@connect(({app}, {route: {auth}}) => ({
   propGroups: app.propGroups.map((pg) =>
     Object.assign({}, pg, {
       includedProps: pg.includedProps.map((prop) =>
@@ -22,13 +22,15 @@ const {PropTypes} = React;
     })
   ),
   // Easily spoofed but all admin actions verified on server.
-  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1
+  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1,
+  isLoggedIn: auth.loggedIn()
 }))
 @autobind
 class PropList extends React.Component {
   static propTypes = {
     propGroups: PropTypes.arrayOf(PropTypes.object),
-    isAdmin: PropTypes.bool
+    isAdmin: PropTypes.bool.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
   }
 
   handleSavePropGroup(propGroup) {
@@ -37,6 +39,18 @@ class PropList extends React.Component {
       payload: Object.assign({}, propGroup, {
         id: utils.createRandomId()
       })
+    });
+  }
+
+  handlePlaceBet(propGroupId, propId, effectiveLine, bubbles) {
+    socket.sendAction({
+      type: PLACE_BET,
+      payload: {
+        propGroupId,
+        propId,
+        effectiveLine,
+        bubbles
+      }
     });
   }
 
@@ -60,6 +74,8 @@ class PropList extends React.Component {
             operator={pg.operator}
             interest={pg.interest}
             includedProps={pg.includedProps}
+            onPlaceBet={this.handlePlaceBet}
+            isLoggedIn={this.props.isLoggedIn}
           />
           )
         }
@@ -87,7 +103,9 @@ class ReadonlyPropGroup extends React.Component {
       description: PropTypes.string.isRequired,
       startingLine: PropTypes.number.isRequired,
       currentLine: PropTypes.number.isRequired
-    })).isRequired
+    })).isRequired,
+    onPlaceBet: PropTypes.func.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
   }
 
   render() {
@@ -105,6 +123,10 @@ class ReadonlyPropGroup extends React.Component {
               description={description}
               line={currentLine}
               choiceLabel={multipleChoiceLabels[index]}
+              isLoggedIn={this.props.isLoggedIn}
+              onPlaceBet={(bubbles) =>
+                this.props.onPlaceBet(this.props.id, propId, currentLine, parseFloat(bubbles))
+              }
             />
           )
         }
@@ -119,7 +141,9 @@ class IncludedProp extends React.Component {
     id: PropTypes.number.isRequired,
     description: PropTypes.string.isRequired,
     line: PropTypes.number.isRequired,
-    choiceLabel: PropTypes.string.isRequired
+    choiceLabel: PropTypes.string.isRequired,
+    onPlaceBet: PropTypes.func.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
   }
 
   state = {
@@ -136,16 +160,19 @@ class IncludedProp extends React.Component {
     const {props} = this;
     return (
       <div style={propContainer}>
-        <div onClick={() => this.handleToggleBetInput(props.id)} style={propRowStyle}>
+        <div
+          style={props.isLoggedIn ? disabledPropRowStyle : enabledPropRowStyle}
+          onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
+        >
           <div style={propItemStyle}>{props.choiceLabel}</div>
           <div style={propItemStyle}>{props.description}</div>
           <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
         </div>
         {
-          this.state.isInputtingBet
+           this.state.isInputtingBet
             ? <PropBetInput
                 alignmentStyle={{paddingLeft: '15px'}}
-                onPlaceBet={() => console.log('TODO: saving...')}
+                onPlaceBet={this.props.onPlaceBet}
                 onCancel={this.handleToggleBetInput}
                 currentBubbleBalance={0}
               />
@@ -169,13 +196,16 @@ const groupLabelStyle = {
   paddingBotton: '5px'
 };
 
-const propRowStyle = {
+const enabledPropRowStyle = {
   display: 'flex',
   flexDirection: 'row',
   paddingTop: topSpacing,
-  paddingLeft: '15px',
-  cursor: 'pointer'
+  paddingLeft: '15px'
 };
+
+const disabledPropRowStyle = Object.assign({}, enabledPropRowStyle, {
+  cursor: 'pointer'
+});
 
 const propItemStyle = {
   marginRight: '10px'

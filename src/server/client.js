@@ -2,7 +2,9 @@
 const fs = require('fs');
 const _ = require('lodash');
 const autobind = require('autobind-decorator');
+const moment = require('moment');
 const store = require('./store');
+const {getEmailForUserId} = require('./selectors');
 const {ADD_NEW_USER_ID, ADD_NEW_USER} = require('./action-types');
 const sharedActionTypes = require('../shared/action-types');
 const {STARTING_BUBBLES, adminEmails} = require('../shared/constants');
@@ -41,6 +43,14 @@ class Client {
     // TODO: move these middleware things to middleware
     if (action.type === sharedActionTypes.NOTIFY_AUTHENTICATION) {
       this._handleAuthentication(action.payload.userId, action.payload.email);
+
+    } else if (action.type === sharedActionTypes.PLACE_BET) {
+      action = Object.assign({}, action, {
+        payload: Object.assign({}, action.payload, {
+          email: getEmailForUserId(store.getState(), this.getUserId()),
+          msTimeStamp: moment().format('x')
+        })
+      });
     }
 
     if (hasPermission(action.type, this.getUserId())) {

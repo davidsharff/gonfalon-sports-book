@@ -29,7 +29,7 @@ ReactDOM.render((
   <Provider store={store}>
     <Router history={history}>
       <Route path="/" component={Root} auth={auth}>
-        <Route path="props" component={PropList} />
+        <Route path="props" component={PropList} auth={auth} />
         <Route path="*" component={NotFound} />
       </Route>
     </Router>
