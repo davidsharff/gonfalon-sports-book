@@ -19,7 +19,7 @@ class HeaderBar extends React.Component {
         </div>
         <div style={linksContainerStyle}>
           <Link style={linkActiveStyle} to="/props">Props</Link>
-          <Link style={linkDisabledStyle} to="/">Live Bets</Link>
+          <Link style={linkActiveStyle} to="/bets">Live Bets</Link>
           <Link style={linkDisabledStyle} to="/">About</Link>
           {
             this.props.isAuthenticated

@@ -72,7 +72,7 @@ class AuthService {
   logout() {
     localStorage.removeItem('id_token');
     localStorage.removeItem('access_token');
-
+    localStorage.removeItem('email');
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
