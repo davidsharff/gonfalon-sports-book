@@ -2,13 +2,15 @@
 const React = require('react');
 const {connect} = require('react-redux');
 const autobind = require('autobind-decorator');
+const _ = require('lodash');
 const socket = require('../socket');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
 const ReadonlyPropGroup = require('../components/readonly-prop-group');
+const EditablePropGroup = require('../components/editable-prop-group');
 const {calcCurrentPropLine} = require('../../shared/selectors');
-const {ADD_NEW_PROP_GROUP, PLACE_BET} = require('../../shared/action-types');
+const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
-const {adminEmails} = require('../../shared/constants');
+const {adminEmails, propGroupOperators} = require('../../shared/constants');
 
 const {PropTypes} = React;
 @connect(({app}, {route: {auth}}) => ({
@@ -40,6 +42,13 @@ class PropList extends React.Component {
     });
   }
 
+  handleSavePropGroupEdit(propGroup) {
+    socket.sendAction({
+      type: EDIT_PROP_GROUP,
+      payload: propGroup
+    });
+  }
+
   handlePlaceBet(propGroupId, propId, bubbles) {
     socket.sendAction({
       type: PLACE_BET,
@@ -64,14 +73,16 @@ class PropList extends React.Component {
         }
         {
           this.props.propGroups.map((pg, i) =>
-          <ReadonlyPropGroup
+          <PropGroupWrapper
             key={pg.id}
             id={pg.id}
+            onSave={this.handleSavePropGroupEdit}
             groupNumber={this.props.propGroups.length - i}
             operator={pg.operator}
             interest={pg.interest}
             includedProps={pg.includedProps}
             onPlaceBet={this.handlePlaceBet}
+            isAdmin={this.props.isAdmin}
             isLoggedIn={this.props.isLoggedIn}
           />
           )
@@ -88,3 +99,79 @@ const containerStyle = {
 };
 
 module.exports = PropList;
+
+@autobind
+class PropGroupWrapper extends React.Component {
+  static propTypes = {
+    id: PropTypes.number.isRequired,
+    isAdmin: PropTypes.bool.isRequired,
+    groupNumber: PropTypes.number.isRequired,
+    operator: PropTypes.oneOf(_.values(propGroupOperators)).isRequired,
+    interest: PropTypes.number.isRequired,
+    onSave: PropTypes.func.isRequired,
+    includedProps: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      description: PropTypes.string.isRequired,
+      startingLine: PropTypes.number.isRequired,
+      currentLine: PropTypes.number.isRequired
+    })).isRequired,
+    onPlaceBet: PropTypes.func.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
+  }
+
+  state = {
+    isEditing: false
+  }
+
+  handleToggleEditing() {
+    if (!this.props.isAdmin) {
+      return;
+    }
+    this.setState({
+      isEditing: !this.state.isEditing
+    });
+  }
+
+  handleSavePropGroup(propGroup) {
+    this.props.onSave(Object.assign({}, propGroup, {
+      id: this.props.id
+    }));
+    this.handleToggleEditing();
+  }
+
+  render() {
+    const {props} = this;
+    return (
+      <div style={propGroupContainerStyle}>
+        {
+          this.state.isEditing
+            ? <EditablePropGroup
+                onSave={this.handleSavePropGroup}
+                onCancel={this.handleToggleEditing}
+                propGroup={{
+                  operator: props.operator,
+                  interest: props.interest,
+                  includedProps: props.includedProps
+                }}
+              />
+            : <ReadonlyPropGroup
+                id={props.id}
+                onStartAdminEdit={this.handleToggleEditing}
+                groupNumber={props.groupNumber}
+                operator={props.operator}
+                interest={props.interest}
+                includedProps={props.includedProps}
+                onPlaceBet={props.onPlaceBet}
+                isLoggedIn={props.isLoggedIn}
+                isAdmin={props.isAdmin}
+              />
+        }
+      </div>
+    );
+  }
+}
+
+const propGroupContainerStyle = {
+  display: 'flex',
+  flexDirection: 'column'
+};

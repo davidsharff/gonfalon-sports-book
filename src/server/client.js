@@ -125,7 +125,7 @@ function isValidAction(action, userId) {
 }
 
 function hasPermissionForAdminActions(actionType, userId) {
-  const adminActions = [sharedActionTypes.ADD_NEW_PROP_GROUP];
+  const adminActions = [sharedActionTypes.ADD_NEW_PROP_GROUP, sharedActionTypes.EDIT_PROP_GROUP];
   if (adminActions.indexOf(actionType) > -1) {
     const authUser = _.find(store.getState().local.authUsers, {userId});
     if (!authUser || adminEmails.indexOf(authUser.email) === -1) {

@@ -10,6 +10,7 @@ const {PropTypes} = React;
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
+    onStartAdminEdit: PropTypes.func,
     groupNumber: PropTypes.number.isRequired,
     operator: PropTypes.oneOf(_.values(propGroupOperators)).isRequired,
     interest: PropTypes.number.isRequired,
@@ -20,13 +21,19 @@ class ReadonlyPropGroup extends React.Component {
       currentLine: PropTypes.number.isRequired
     })).isRequired,
     onPlaceBet: PropTypes.func.isRequired,
-    isLoggedIn: PropTypes.bool.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
+    isAdmin: PropTypes.bool.isRequired
   }
 
   render() {
+    const groupLabelStyle = this.props.isAdmin
+      ? adminGroupLabelStyle
+      : baseGroupLabelStyle;
     return (
       <div style={propGroupContainerStyle}>
-        <div style={groupLabelStyle}>Group {this.props.groupNumber}</div>
+        <div style={groupLabelStyle} onClick={this.props.onStartAdminEdit}>
+          Group {this.props.groupNumber}
+        </div>
         <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         <div style={operatorStyle}>{this.props.operator}</div>
         {
@@ -110,10 +117,14 @@ const propGroupContainerStyle = {
   paddingBottom: '20px'
 };
 
-const groupLabelStyle = {
+const baseGroupLabelStyle = {
   fontWeight: '400',
   paddingBotton: '5px'
 };
+
+const adminGroupLabelStyle = Object.assign({}, baseGroupLabelStyle, {
+  cursor: 'pointer'
+});
 
 const enabledPropRowStyle = {
   display: 'flex',
@@ -148,6 +159,6 @@ module.exports = ReadonlyPropGroup;
 
 function formatInterestValue(interest) {
   return interest > 0
-    ?  'Interest ' + interest * 100 + '%'
+    ?  'Interest ' + interest + '%'
     : 'No interest';
 }
