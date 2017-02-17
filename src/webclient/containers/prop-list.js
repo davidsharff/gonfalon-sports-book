@@ -3,24 +3,34 @@ const React = require('react');
 const {connect} = require('react-redux');
 const _ = require('lodash');
 const autobind = require('autobind-decorator');
-const AdminPropGroupControls = require('../components/admin-prop-group-controls');
 const socket = require('../socket');
-const {ADD_NEW_PROP_GROUP} = require('../../shared/action-types');
+const AdminPropGroupControls = require('../components/admin-prop-group-controls');
+const PropBetInput = require('../components/prop-bet-input');
+const {calcCurrentPropLine} = require('../../shared/selectors');
+const {ADD_NEW_PROP_GROUP, PLACE_BET} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
 const {adminEmails} = require('../../shared/constants');
 
 const {PropTypes} = React;
-@connect(({app}) => ({
-  propGroups: app.propGroups,
+@connect(({app}, {route: {auth}}) => ({
+  propGroups: app.propGroups.map((pg) =>
+    Object.assign({}, pg, {
+      includedProps: pg.includedProps.map((prop) =>
+        Object.assign({}, prop, {currentLine: calcCurrentPropLine(app, pg.id, prop.id)})
+      )
+    })
+  ),
   // Easily spoofed but all admin actions verified on server.
-  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1
+  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1,
+  isLoggedIn: auth.loggedIn()
 }))
 @autobind
 class PropList extends React.Component {
   static propTypes = {
     propGroups: PropTypes.arrayOf(PropTypes.object),
-    isAdmin: PropTypes.bool
+    isAdmin: PropTypes.bool.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
   }
 
   handleSavePropGroup(propGroup) {
@@ -29,6 +39,17 @@ class PropList extends React.Component {
       payload: Object.assign({}, propGroup, {
         id: utils.createRandomId()
       })
+    });
+  }
+
+  handlePlaceBet(propGroupId, propId, bubbles) {
+    socket.sendAction({
+      type: PLACE_BET,
+      payload: {
+        propGroupId,
+        propId,
+        bubbles
+      }
     });
   }
 
@@ -47,10 +68,13 @@ class PropList extends React.Component {
           this.props.propGroups.map((pg, i) =>
           <ReadonlyPropGroup
             key={pg.id}
+            id={pg.id}
             groupNumber={this.props.propGroups.length - i}
             operator={pg.operator}
             interest={pg.interest}
             includedProps={pg.includedProps}
+            onPlaceBet={this.handlePlaceBet}
+            isLoggedIn={this.props.isLoggedIn}
           />
           )
         }
@@ -67,16 +91,21 @@ const containerStyle = {
 
 module.exports = PropList;
 
+// TODO: move to component directory
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
+    id: PropTypes.number.isRequired,
     groupNumber: PropTypes.number.isRequired,
     operator: PropTypes.oneOf(_.values(propGroupOperators)).isRequired,
     interest: PropTypes.number.isRequired,
     includedProps: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.number,
-      description: PropTypes.string,
-      startingLine: PropTypes.number
-    })).isRequired
+      id: PropTypes.number.isRequired,
+      description: PropTypes.string.isRequired,
+      startingLine: PropTypes.number.isRequired,
+      currentLine: PropTypes.number.isRequired
+    })).isRequired,
+    onPlaceBet: PropTypes.func.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
   }
 
   render() {
@@ -87,13 +116,72 @@ class ReadonlyPropGroup extends React.Component {
         <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         <div style={operatorStyle}>{this.props.operator}</div>
         {
-          this.props.includedProps.map(({id, description, startingLine}, index) =>
-            <div key={id} style={propRowStyle}>
-              <div style={propItemStyle}>{multipleChoiceLabels[index]})</div>
-              <div style={propItemStyle}>{description}</div>
-              <div style={propItemStyle}>{(startingLine > 0 ? '+' : '') + startingLine}</div>
-            </div>
+          this.props.includedProps.map(({id: propId, description, currentLine}, index) =>
+            <IncludedProp
+              key={propId}
+              id={propId}
+              description={description}
+              line={currentLine}
+              choiceLabel={multipleChoiceLabels[index]}
+              isLoggedIn={this.props.isLoggedIn}
+              onPlaceBet={(bubbles) =>
+                this.props.onPlaceBet(this.props.id, propId, parseFloat(bubbles))
+              }
+            />
           )
+        }
+      </div>
+    );
+  }
+}
+
+@autobind
+class IncludedProp extends React.Component {
+  static propTypes = {
+    id: PropTypes.number.isRequired,
+    description: PropTypes.string.isRequired,
+    line: PropTypes.number.isRequired,
+    choiceLabel: PropTypes.string.isRequired,
+    onPlaceBet: PropTypes.func.isRequired,
+    isLoggedIn: PropTypes.bool.isRequired
+  }
+
+  state = {
+    isInputtingBet: false
+  }
+
+  handleToggleBetInput() {
+    this.setState({
+      isInputtingBet: !this.state.isInputtingBet
+    });
+  }
+
+  handlePlaceBet(bubbles) {
+    this.props.onPlaceBet(bubbles);
+    this.handleToggleBetInput();
+  }
+
+  render() {
+    const {props} = this;
+    return (
+      <div style={propContainer}>
+        <div
+          style={props.isLoggedIn ? disabledPropRowStyle : enabledPropRowStyle}
+          onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
+        >
+          <div style={propItemStyle}>{props.choiceLabel}</div>
+          <div style={propItemStyle}>{props.description}</div>
+          <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
+        </div>
+        {
+           this.state.isInputtingBet
+            ? <PropBetInput
+                alignmentStyle={{paddingLeft: '15px'}}
+                onPlaceBet={this.handlePlaceBet}
+                onCancel={this.handleToggleBetInput}
+                currentBubbleBalance={0}
+              />
+            : null
         }
       </div>
     );
@@ -113,12 +201,16 @@ const groupLabelStyle = {
   paddingBotton: '5px'
 };
 
-const propRowStyle = {
+const enabledPropRowStyle = {
   display: 'flex',
   flexDirection: 'row',
   paddingTop: topSpacing,
   paddingLeft: '15px'
 };
+
+const disabledPropRowStyle = Object.assign({}, enabledPropRowStyle, {
+  cursor: 'pointer'
+});
 
 const propItemStyle = {
   marginRight: '10px'
@@ -131,6 +223,11 @@ const interestStyle = {
 
 const operatorStyle = {
   paddingTop: '10px'
+};
+
+const propContainer = {
+  display: 'flex',
+  flexDirection: 'column'
 };
 
 function formatInterestValue(interest) {

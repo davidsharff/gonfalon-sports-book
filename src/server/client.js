@@ -2,10 +2,13 @@
 const fs = require('fs');
 const _ = require('lodash');
 const autobind = require('autobind-decorator');
+const moment = require('moment');
 const store = require('./store');
+const {getEmailForUserId} = require('./selectors');
 const {ADD_NEW_USER_ID, ADD_NEW_USER} = require('./action-types');
 const sharedActionTypes = require('../shared/action-types');
 const {STARTING_BUBBLES, adminEmails} = require('../shared/constants');
+const {calcCurrentPropLine} = require('../shared/selectors');
 
 let clients = [];
 class Client {
@@ -41,14 +44,25 @@ class Client {
     // TODO: move these middleware things to middleware
     if (action.type === sharedActionTypes.NOTIFY_AUTHENTICATION) {
       this._handleAuthentication(action.payload.userId, action.payload.email);
+
+    } else if (action.type === sharedActionTypes.PLACE_BET) {
+      const {payload} = action;
+      action = Object.assign({}, action, {
+        payload: Object.assign({}, payload, {
+          email: getEmailForUserId(store.getState(), this.getUserId()),
+          msTimeStamp: moment().format('x'),
+          // TODO: got to be a better way of doing this. Balk and notifying user if the line changed since submission?
+          effectiveLine: calcCurrentPropLine(store.getState().app, payload.propGroupId, payload.propId)
+        })
+      });
     }
 
-    if (hasPermission(action.type, this.getUserId())) {
+    if (isValidAction(action, this.getUserId())) {
       store.dispatch(action);
       fs.writeFile('app-state.json', JSON.stringify(store.getState()));
       broadcastNewAppState();
     } else {
-      console.error(`Invalid permission. UserId: ${this.getUserId()}`);
+      console.error(`Invalid action. UserId: ${this.getUserId()}`);
     }
   }
 
@@ -102,7 +116,15 @@ function broadcastNewAppState() {
   clients.forEach((c) => c.sendCurrentState());
 }
 
-function hasPermission(actionType, userId) {
+function isValidAction(action, userId) {
+  // TODO: these should return a useful error message.
+  if (action.type === sharedActionTypes.PLACE_BET) {
+    return action.payload.bubbles > 0;
+  }
+  return hasPermissionForAdminActions(action.type, userId);
+}
+
+function hasPermissionForAdminActions(actionType, userId) {
   const adminActions = [sharedActionTypes.ADD_NEW_PROP_GROUP];
   if (adminActions.indexOf(actionType) > -1) {
     const authUser = _.find(store.getState().local.authUsers, {userId});
