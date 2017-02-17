@@ -8,7 +8,7 @@ const AdminPropGroupControls = require('../components/admin-prop-group-controls'
 const ReadonlyPropGroup = require('../components/readonly-prop-group');
 const EditablePropGroup = require('../components/editable-prop-group');
 const {calcCurrentPropLine} = require('../../shared/selectors');
-const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET} = require('../../shared/action-types');
+const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET, ADD_WINNING_PROP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {adminEmails, propGroupOperators} = require('../../shared/constants');
 
@@ -60,6 +60,15 @@ class PropList extends React.Component {
     });
   }
 
+  handleAddWinningProp(propGroupId, propId) {
+    socket.sendAction({
+      type: ADD_WINNING_PROP,
+      payload: {
+        propGroupId,
+        propId
+      }
+    });
+  }
 
   render() {
     return (
@@ -84,6 +93,7 @@ class PropList extends React.Component {
             onPlaceBet={this.handlePlaceBet}
             isAdmin={this.props.isAdmin}
             isLoggedIn={this.props.isLoggedIn}
+            onAddWinningProp={this.handleAddWinningProp}
           />
           )
         }
@@ -116,7 +126,8 @@ class PropGroupWrapper extends React.Component {
       currentLine: PropTypes.number.isRequired
     })).isRequired,
     onPlaceBet: PropTypes.func.isRequired,
-    isLoggedIn: PropTypes.bool.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
+    onAddWinningProp: PropTypes.func.isRequired
   }
 
   state = {
@@ -137,6 +148,10 @@ class PropGroupWrapper extends React.Component {
       id: this.props.id
     }));
     this.handleToggleEditing();
+  }
+
+  handleAddWinningProp(propId) {
+    this.props.onAddWinningProp(this.props.id, propId);
   }
 
   render() {
@@ -164,6 +179,7 @@ class PropGroupWrapper extends React.Component {
                 onPlaceBet={props.onPlaceBet}
                 isLoggedIn={props.isLoggedIn}
                 isAdmin={props.isAdmin}
+                onAddWinningProp={this.handleAddWinningProp}
               />
         }
       </div>

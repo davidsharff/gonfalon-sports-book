@@ -21,7 +21,14 @@ function appReducer(app, action) {
             : pg
         )
       });
-
+    }
+    case sharedActionTypes.ADD_WINNING_PROP: {
+      return Object.assign({}, app, {
+        winningProps: [
+          payload,
+          ...app.winningProps
+        ]
+      });
     }
     case sharedActionTypes.PLACE_BET: {
       return Object.assign({}, app, {

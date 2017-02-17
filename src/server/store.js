@@ -24,7 +24,8 @@ function getInitialState() {
     app: {
       users: [],
       propGroups: [],
-      bets: []
+      bets: [],
+      winningProps: []
     }
   };
   const savedState = fs.readFileSync(path.resolve(__dirname, '../../app-state.json'), {encoding: 'utf-8'});

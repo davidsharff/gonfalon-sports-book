@@ -22,7 +22,8 @@ class ReadonlyPropGroup extends React.Component {
     })).isRequired,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
-    isAdmin: PropTypes.bool.isRequired
+    isAdmin: PropTypes.bool.isRequired,
+    onAddWinningProp: PropTypes.func.isRequired
   }
 
   render() {
@@ -48,6 +49,8 @@ class ReadonlyPropGroup extends React.Component {
               onPlaceBet={(bubbles) =>
                 this.props.onPlaceBet(this.props.id, propId, parseFloat(bubbles))
               }
+              onAddWinningProp={this.props.onAddWinningProp}
+              isAdmin={this.props.isAdmin}
             />
           )
         }
@@ -64,7 +67,9 @@ class IncludedProp extends React.Component {
     line: PropTypes.number.isRequired,
     choiceLabel: PropTypes.string.isRequired,
     onPlaceBet: PropTypes.func.isRequired,
-    isLoggedIn: PropTypes.bool.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
+    onAddWinningProp: PropTypes.func.isRequired,
+    isAdmin: PropTypes.bool.isRequired
   }
 
   state = {
@@ -84,15 +89,26 @@ class IncludedProp extends React.Component {
 
   render() {
     const {props} = this;
+    // TODO: it is horrible that the prop rows grow the width of the screen (and are clickable)
     return (
       <div style={propContainer}>
-        <div
-          style={props.isLoggedIn ? disabledPropRowStyle : enabledPropRowStyle}
-          onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
-        >
-          <div style={propItemStyle}>{props.choiceLabel}</div>
-          <div style={propItemStyle}>{props.description}</div>
-          <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
+        <div style={props.isLoggedIn ? disabledPropRowStyle : enabledPropRowStyle}>
+          <div
+            style={{display: 'flex', flexDirection: 'row'}}
+            onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
+          >
+            <div style={propItemStyle}>{props.choiceLabel}</div>
+            <div style={propItemStyle}>{props.description}</div>
+            <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
+          </div>
+          {
+            props.isAdmin
+              ? <div style={markAsWonStyle} onClick={() => props.onAddWinningProp(props.id)}>
+                  Mark as Won
+                </div>
+              : null
+
+          }
         </div>
         {
           this.state.isInputtingBet
@@ -153,6 +169,13 @@ const operatorStyle = {
 const propContainer = {
   display: 'flex',
   flexDirection: 'column'
+};
+
+const markAsWonStyle = {
+  paddingLeft: '5px',
+  cursor: 'pointer',
+  color: '#22527b',
+  fontSize: '10pt'
 };
 
 module.exports = ReadonlyPropGroup;
