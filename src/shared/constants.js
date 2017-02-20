@@ -8,6 +8,8 @@ module.exports = {
   multipleChoiceLabels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
   STARTING_BUBBLES: 1000,
   adminEmails: [
-    'davesharff@gmail.com'
+    'davesharff@gmail.com',
+    '@NateMeyvis', // TODO: these should be admin "accounts", not emails.
+    'mattsienkiewicz@gmail.com'
   ]
 };
