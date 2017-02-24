@@ -16,7 +16,7 @@ class EditablePropGroup extends React.Component {
   }
 
   state = {
-    operator: _.values(propGroupOperators)[0],
+    operator: null,
     interest: 0,
     includedProps: []
   }
@@ -100,7 +100,7 @@ class EditablePropGroup extends React.Component {
           <div style={labelStyle}>Operator</div>
           <div>
             <select
-              value={null}
+              value={this.state.operator}
               onChange={this.handleOperatorChange}
             >
               {
