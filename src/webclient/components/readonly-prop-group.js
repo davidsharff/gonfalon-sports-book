@@ -101,14 +101,6 @@ class IncludedProp extends React.Component {
             <div style={propItemStyle}>{props.description}</div>
             <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
           </div>
-          {
-            props.isAdmin
-              ? <div style={markAsWonStyle} onClick={() => props.onAddWinningProp(props.id)}>
-                  Mark as Won
-                </div>
-              : null
-
-          }
         </div>
         {
           this.state.isInputtingBet
@@ -119,6 +111,14 @@ class IncludedProp extends React.Component {
                 currentBubbleBalance={0}
               />
             : null
+        }
+        {
+          this.state.isInputtingBet && props.isAdmin
+            ? <button style={markAsWonStyle} onClick={() => props.onAddWinningProp(props.id)}>
+                Mark as Won
+              </button>
+            : null
+
         }
       </div>
     );
@@ -172,10 +172,9 @@ const propContainer = {
 };
 
 const markAsWonStyle = {
-  paddingLeft: '5px',
-  cursor: 'pointer',
-  color: '#22527b',
-  fontSize: '10pt'
+  marginLeft: '15px',
+  marginTop: '10px',
+  maxWidth: '100px'
 };
 
 module.exports = ReadonlyPropGroup;
