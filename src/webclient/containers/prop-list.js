@@ -7,7 +7,7 @@ const socket = require('../socket');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
 const ReadonlyPropGroup = require('../components/readonly-prop-group');
 const EditablePropGroup = require('../components/editable-prop-group');
-const {calcCurrentPropLine, getWinningPropIdForGroup} = require('../../shared/selectors');
+const {calcCurrentPropLine, getWinningPropIdForGroup, getUserBubbleBalance} = require('../../shared/selectors');
 const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET, ADD_WINNING_PROP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {adminEmails, propGroupOperators} = require('../../shared/constants');
@@ -26,14 +26,16 @@ const {PropTypes} = React;
   ),
   // Easily spoofed but all admin actions verified on server.
   isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1,
-  isLoggedIn: auth.loggedIn()
+  isLoggedIn: auth.loggedIn(),
+  userBubbleBalance: getUserBubbleBalance(app, auth.getEmail())
 }))
 @autobind
 class PropList extends React.Component {
   static propTypes = {
     propGroups: PropTypes.arrayOf(PropTypes.object),
     isAdmin: PropTypes.bool.isRequired,
-    isLoggedIn: PropTypes.bool.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
+    userBubbleBalance: PropTypes.number
   }
 
   handleSavePropGroup(propGroup) {
@@ -74,6 +76,7 @@ class PropList extends React.Component {
   }
 
   render() {
+    console.log(this.props.userBubbleBalance);
     return (
       <div style={containerStyle}>
         {
@@ -98,6 +101,7 @@ class PropList extends React.Component {
               isAdmin={this.props.isAdmin}
               isLoggedIn={this.props.isLoggedIn}
               onAddWinningProp={this.handleAddWinningProp}
+              userBubbleBalance={this.props.userBubbleBalance}
             />
           )
         }
@@ -132,7 +136,8 @@ class PropGroupWrapper extends React.Component {
     winningPropId: PropTypes.number,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
-    onAddWinningProp: PropTypes.func.isRequired
+    onAddWinningProp: PropTypes.func.isRequired,
+    userBubbleBalance: PropTypes.number
   }
 
   state = {
@@ -186,6 +191,7 @@ class PropGroupWrapper extends React.Component {
                 isAdmin={props.isAdmin}
                 onAddWinningProp={this.handleAddWinningProp}
                 winningPropId={props.winningPropId}
+                userBubbleBalance={props.userBubbleBalance}
               />
         }
       </div>

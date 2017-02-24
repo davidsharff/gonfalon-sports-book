@@ -19,6 +19,7 @@ function getPropLabel(appState, propGroupId, propId) {
   return multipleChoiceLabels[_.findIndex(includedProps, {id: propId})];
 }
 
+
 function getWinningPropIdForGroup(appState, propGroupId) {
   if (_.filter(appState.winningProps, {propGroupId}).length > 2) {
     throw new Error(`Found multiple winning props for group: ${propGroupId}`);
@@ -27,9 +28,23 @@ function getWinningPropIdForGroup(appState, propGroupId) {
   return winningPropRecord ? winningPropRecord.propId : null;
 }
 
+function getUserBubbleBalance(appState, email) { // TODO: change to userId since we don't know if it will be email/twitter/etc.
+  const user = _.find(appState.users, {email});
+  return user
+    ? user.startingBubbles - getUserTotalBets(appState, email)
+    : null;
+}
+
 module.exports = {
   calcCurrentPropLine,
   getPropGroupLabel,
   getPropLabel,
-  getWinningPropIdForGroup
+  getWinningPropIdForGroup,
+  getUserBubbleBalance
 };
+
+function getUserTotalBets(appState, email) {
+  return _(appState.bets)
+    .filter({email})
+    .sumBy('bubbles');
+}

@@ -25,6 +25,7 @@ class ReadonlyPropGroup extends React.Component {
     isLoggedIn: PropTypes.bool.isRequired,
     isAdmin: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
+    userBubbleBalance: PropTypes.number,
     winningPropId: PropTypes.number
   }
 
@@ -61,6 +62,7 @@ class ReadonlyPropGroup extends React.Component {
               }
               onAddWinningProp={this.props.onAddWinningProp}
               isAdmin={this.props.isAdmin}
+              userBubbleBalance={this.props.userBubbleBalance}
             />
           )
         }
@@ -81,7 +83,8 @@ class IncludedProp extends React.Component {
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
-    isAdmin: PropTypes.bool.isRequired
+    isAdmin: PropTypes.bool.isRequired,
+    userBubbleBalance: PropTypes.number
   }
 
   state = {
@@ -134,7 +137,7 @@ class IncludedProp extends React.Component {
                 alignmentStyle={{paddingLeft: '15px'}}
                 onPlaceBet={this.handlePlaceBet}
                 onCancel={this.handleToggleBetInput}
-                currentBubbleBalance={0}
+                currentBubbleBalance={props.userBubbleBalance}
               />
             : null
         }

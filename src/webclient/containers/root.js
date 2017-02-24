@@ -3,12 +3,14 @@ const React = require('react');
 const {connect} = require('react-redux');
 const _ = require('lodash');
 const HeaderBar = require('../components/header-bar');
+const {getUserBubbleBalance} = require('../../shared/selectors');
 
 @connect(({app}, {route: {auth}}) => ({
   isAuthenticated: auth.loggedIn(),
   handleLogin: auth.login,
   handleLogout: auth.logout,
-  hasAppState: !_.isEmpty(app)
+  hasAppState: !_.isEmpty(app),
+  userBubbleBalance: getUserBubbleBalance(app, auth.getEmail())
 }))
 class Root extends React.Component {
   static propTypes = {
@@ -16,7 +18,8 @@ class Root extends React.Component {
     children: React.PropTypes.node,
     isAuthenticated: React.PropTypes.bool,
     handleLogin: React.PropTypes.func,
-    handleLogout: React.PropTypes.func
+    handleLogout: React.PropTypes.func,
+    userBubbleBalance: React.PropTypes.number
   }
   render() {
     return (
@@ -25,6 +28,7 @@ class Root extends React.Component {
           isAuthenticated={this.props.isAuthenticated}
           onLogin={this.props.handleLogin}
           onLogout={this.props.handleLogout}
+          userBubbleBalance={this.props.userBubbleBalance}
         />
         {
           this.props.hasAppState
