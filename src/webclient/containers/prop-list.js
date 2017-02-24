@@ -101,6 +101,7 @@ class PropList extends React.Component {
               isAdmin={this.props.isAdmin}
               isLoggedIn={this.props.isLoggedIn}
               onAddWinningProp={this.handleAddWinningProp}
+              userBubbleBalance={this.props.userBubbleBalance}
             />
           )
         }
@@ -135,7 +136,8 @@ class PropGroupWrapper extends React.Component {
     winningPropId: PropTypes.number,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
-    onAddWinningProp: PropTypes.func.isRequired
+    onAddWinningProp: PropTypes.func.isRequired,
+    userBubbleBalance: PropTypes.number
   }
 
   state = {
@@ -189,6 +191,7 @@ class PropGroupWrapper extends React.Component {
                 isAdmin={props.isAdmin}
                 onAddWinningProp={this.handleAddWinningProp}
                 winningPropId={props.winningPropId}
+                userBubbleBalance={props.userBubbleBalance}
               />
         }
       </div>

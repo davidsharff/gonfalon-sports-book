@@ -9,23 +9,31 @@ class HeaderBar extends React.Component {
   static propTypes = {
     isAuthenticated: React.PropTypes.bool.isRequired,
     onLogin: React.PropTypes.func,
-    onLogout: React.PropTypes.func
+    onLogout: React.PropTypes.func,
+    userBubbleBalance: React.PropTypes.number
   };
   render() {
     return (
-      <div style={rowStyle}>
+      <div style={headerRowStyle}>
         <div style={mainTitleStyle}>
           Gonfalon Sportsbook
         </div>
-        <div style={linksContainerStyle}>
-          <Link style={linkActiveStyle} to="/props">Props</Link>
-          <Link style={linkActiveStyle} to="/bets">Live Bets</Link>
-          <Link style={linkDisabledStyle} to="/">About</Link>
+        <div>
           {
-            this.props.isAuthenticated
-              ? <div style={linkActiveStyle} onClick={this.props.onLogout}>Logout</div>
-              : <div style={linkActiveStyle} onClick={this.props.onLogin}>Login</div>
+            this.props.userBubbleBalance !== null
+              ? <div style={bubbleBalanceStyle}>Bubbles:&nbsp;{this.props.userBubbleBalance}</div>
+              : null
           }
+          <div style={linksContainerStyle}>
+            <Link style={linkActiveStyle} to="/props">Props</Link>
+            <Link style={linkActiveStyle} to="/bets">Live Bets</Link>
+            <Link style={linkDisabledStyle} to="/">About</Link>
+            {
+              this.props.isAuthenticated
+                ? <div style={linkActiveStyle} onClick={this.props.onLogout}>Logout</div>
+                : <div style={linkActiveStyle} onClick={this.props.onLogin}>Login</div>
+            }
+          </div>
         </div>
       </div>
     );
@@ -34,7 +42,7 @@ class HeaderBar extends React.Component {
 
 module.exports = HeaderBar;
 
-const rowStyle = {
+const headerRowStyle = {
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
@@ -45,6 +53,13 @@ const rowStyle = {
   marginLeft: '10px',
   marginRight: '10px',
   padding: '10px 0 10px 0'
+};
+
+const bubbleBalanceStyle = {
+  display: 'flex',
+  flexDirection: 'row',
+  fontSize: '10pt',
+  justifyContent: 'flex-end'
 };
 
 const linksContainerStyle = {
