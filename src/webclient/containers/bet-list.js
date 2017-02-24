@@ -83,11 +83,14 @@ const oddRowStyle = Object.assign({}, rowStyle, {
 });
 
 const cellStyle = {
-  width: '300px'
+  width: '300px',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden'
 };
 
 const userEmailCellStyle = Object.assign({}, cellStyle, {
-  color: '#42f480'
+  fontStyle: 'italic'
 });
 
 const headerCellStyle = Object.assign({}, cellStyle, {
