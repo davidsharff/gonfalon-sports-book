@@ -7,7 +7,7 @@ const socket = require('../socket');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
 const ReadonlyPropGroup = require('../components/readonly-prop-group');
 const EditablePropGroup = require('../components/editable-prop-group');
-const {calcCurrentPropLine} = require('../../shared/selectors');
+const {calcCurrentPropLine, getWinningPropIdForGroup} = require('../../shared/selectors');
 const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET, ADD_WINNING_PROP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {adminEmails, propGroupOperators} = require('../../shared/constants');
@@ -16,8 +16,11 @@ const {PropTypes} = React;
 @connect(({app}, {route: {auth}}) => ({
   propGroups: app.propGroups.map((pg) =>
     Object.assign({}, pg, {
+      winningPropId: getWinningPropIdForGroup(app, pg.id),
       includedProps: pg.includedProps.map((prop) =>
-        Object.assign({}, prop, {currentLine: calcCurrentPropLine(app, pg.id, prop.id)})
+        Object.assign({}, prop, {
+          currentLine: calcCurrentPropLine(app, pg.id, prop.id)
+        })
       )
     })
   ),
@@ -82,19 +85,20 @@ class PropList extends React.Component {
         }
         {
           this.props.propGroups.map((pg, i) =>
-          <PropGroupWrapper
-            key={pg.id}
-            id={pg.id}
-            onSave={this.handleSavePropGroupEdit}
-            groupNumber={this.props.propGroups.length - i}
-            operator={pg.operator}
-            interest={pg.interest}
-            includedProps={pg.includedProps}
-            onPlaceBet={this.handlePlaceBet}
-            isAdmin={this.props.isAdmin}
-            isLoggedIn={this.props.isLoggedIn}
-            onAddWinningProp={this.handleAddWinningProp}
-          />
+            <PropGroupWrapper
+              key={pg.id}
+              id={pg.id}
+              onSave={this.handleSavePropGroupEdit}
+              groupNumber={this.props.propGroups.length - i}
+              operator={pg.operator}
+              interest={pg.interest}
+              includedProps={pg.includedProps}
+              winningPropId={pg.winningPropId}
+              onPlaceBet={this.handlePlaceBet}
+              isAdmin={this.props.isAdmin}
+              isLoggedIn={this.props.isLoggedIn}
+              onAddWinningProp={this.handleAddWinningProp}
+            />
           )
         }
       </div>
@@ -125,6 +129,7 @@ class PropGroupWrapper extends React.Component {
       startingLine: PropTypes.number.isRequired,
       currentLine: PropTypes.number.isRequired
     })).isRequired,
+    winningPropId: PropTypes.number,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired
@@ -180,6 +185,7 @@ class PropGroupWrapper extends React.Component {
                 isLoggedIn={props.isLoggedIn}
                 isAdmin={props.isAdmin}
                 onAddWinningProp={this.handleAddWinningProp}
+                winningPropId={props.winningPropId}
               />
         }
       </div>

@@ -19,8 +19,17 @@ function getPropLabel(appState, propGroupId, propId) {
   return multipleChoiceLabels[_.findIndex(includedProps, {id: propId})];
 }
 
+function getWinningPropIdForGroup(appState, propGroupId) {
+  if (_.filter(appState.winningProps, {propGroupId}).length > 2) {
+    throw new Error(`Found multiple winning props for group: ${propGroupId}`);
+  }
+  const winningPropRecord = _.find(appState.winningProps, {propGroupId});
+  return winningPropRecord ? winningPropRecord.propId : null;
+}
+
 module.exports = {
   calcCurrentPropLine,
   getPropGroupLabel,
-  getPropLabel
+  getPropLabel,
+  getWinningPropIdForGroup
 };

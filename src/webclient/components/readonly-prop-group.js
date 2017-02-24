@@ -7,6 +7,7 @@ const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constan
 
 const {PropTypes} = React;
 
+@autobind
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
@@ -23,16 +24,23 @@ class ReadonlyPropGroup extends React.Component {
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     isAdmin: PropTypes.bool.isRequired,
-    onAddWinningProp: PropTypes.func.isRequired
+    onAddWinningProp: PropTypes.func.isRequired,
+    winningPropId: PropTypes.number
+  }
+
+  handleStartEdit() {
+    if (!this.props.winningPropId) {
+      this.props.onStartAdminEdit();
+    }
   }
 
   render() {
-    const groupLabelStyle = this.props.isAdmin
+    const groupLabelStyle = this.props.isAdmin && !this.props.winningPropId
       ? adminGroupLabelStyle
       : baseGroupLabelStyle;
     return (
       <div style={propGroupContainerStyle}>
-        <div style={groupLabelStyle} onClick={this.props.onStartAdminEdit}>
+        <div style={groupLabelStyle} onClick={this.handleStartEdit}>
           Group {this.props.groupNumber}
         </div>
         <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
@@ -43,6 +51,8 @@ class ReadonlyPropGroup extends React.Component {
               key={propId}
               id={propId}
               description={description}
+              isWinningProp={this.props.winningPropId === propId}
+              hasWinningProp={!!this.props.winningPropId}
               line={currentLine}
               choiceLabel={multipleChoiceLabels[index]}
               isLoggedIn={this.props.isLoggedIn}
@@ -64,6 +74,8 @@ class IncludedProp extends React.Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
     description: PropTypes.string.isRequired,
+    isWinningProp: PropTypes.bool.isRequired,
+    hasWinningProp: PropTypes.bool.isRequired,
     line: PropTypes.number.isRequired,
     choiceLabel: PropTypes.string.isRequired,
     onPlaceBet: PropTypes.func.isRequired,
@@ -77,9 +89,11 @@ class IncludedProp extends React.Component {
   }
 
   handleToggleBetInput() {
-    this.setState({
-      isInputtingBet: !this.state.isInputtingBet
-    });
+    if (!this.props.hasWinningProp) {
+      this.setState({
+        isInputtingBet: !this.state.isInputtingBet
+      });
+    }
   }
 
   handlePlaceBet(bubbles) {
@@ -87,12 +101,24 @@ class IncludedProp extends React.Component {
     this.handleToggleBetInput();
   }
 
+  handleMarkAsWon(propId) {
+    this.handleToggleBetInput();
+    this.props.onAddWinningProp(propId);
+  }
+
   render() {
     const {props} = this;
+
+    const propContainerStyle = props.hasWinningProp
+      ? props.isWinningProp
+        ? winningPropContainerStyle
+        : losingPropContainerStyle
+      : basePropContainerStyle;
+
     // TODO: it is horrible that the prop rows grow the width of the screen (and are clickable)
     return (
-      <div style={propContainer}>
-        <div style={props.isLoggedIn ? disabledPropRowStyle : enabledPropRowStyle}>
+      <div style={propContainerStyle}>
+        <div style={props.isLoggedIn && !props.hasWinningProp ? enabledPropRowStyle : disabledPropRowStyle}>
           <div
             style={{display: 'flex', flexDirection: 'row'}}
             onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
@@ -114,7 +140,7 @@ class IncludedProp extends React.Component {
         }
         {
           this.state.isInputtingBet && props.isAdmin
-            ? <button style={markAsWonStyle} onClick={() => props.onAddWinningProp(props.id)}>
+            ? <button style={markAsWonStyle} onClick={() => this.handleMarkAsWon(props.id)}>
                 Mark as Won
               </button>
             : null
@@ -146,11 +172,12 @@ const enabledPropRowStyle = {
   display: 'flex',
   flexDirection: 'row',
   paddingTop: topSpacing,
-  paddingLeft: '15px'
+  paddingLeft: '15px',
+  cursor: 'pointer'
 };
 
 const disabledPropRowStyle = Object.assign({}, enabledPropRowStyle, {
-  cursor: 'pointer'
+  cursor: 'default'
 });
 
 const propItemStyle = {
@@ -166,7 +193,7 @@ const operatorStyle = {
   paddingTop: '10px'
 };
 
-const propContainer = {
+const basePropContainerStyle = {
   display: 'flex',
   flexDirection: 'column'
 };
@@ -176,6 +203,14 @@ const markAsWonStyle = {
   marginTop: '10px',
   maxWidth: '100px'
 };
+
+const winningPropContainerStyle = Object.assign({}, basePropContainerStyle, {
+  color: '#42c88a'
+});
+
+const losingPropContainerStyle = Object.assign({}, basePropContainerStyle, {
+  color: '#aaa'
+});
 
 module.exports = ReadonlyPropGroup;
 
