@@ -29,7 +29,7 @@ class AuthService {
     });
 
     this.sendServerAuthDetails();
-
+    // TODO: this isn't serving it's purpose. We are still blowing up for unallowed login callback urls.
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
