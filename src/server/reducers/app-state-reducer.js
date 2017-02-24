@@ -13,6 +13,23 @@ function appReducer(app, action) {
         ]
       });
     }
+    case sharedActionTypes.EDIT_PROP_GROUP: {
+      return Object.assign({}, app, {
+        propGroups: app.propGroups.map((pg) =>
+          pg.id === payload.id
+            ? Object.assign({}, pg, payload)
+            : pg
+        )
+      });
+    }
+    case sharedActionTypes.ADD_WINNING_PROP: {
+      return Object.assign({}, app, {
+        winningProps: [
+          payload,
+          ...app.winningProps
+        ]
+      });
+    }
     case sharedActionTypes.PLACE_BET: {
       return Object.assign({}, app, {
         bets: [

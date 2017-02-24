@@ -1,23 +1,26 @@
 'use strict';
 const React = require('react');
 const {connect} = require('react-redux');
-const _ = require('lodash');
 const autobind = require('autobind-decorator');
+const _ = require('lodash');
 const socket = require('../socket');
 const AdminPropGroupControls = require('../components/admin-prop-group-controls');
-const PropBetInput = require('../components/prop-bet-input');
-const {calcCurrentPropLine} = require('../../shared/selectors');
-const {ADD_NEW_PROP_GROUP, PLACE_BET} = require('../../shared/action-types');
+const ReadonlyPropGroup = require('../components/readonly-prop-group');
+const EditablePropGroup = require('../components/editable-prop-group');
+const {calcCurrentPropLine, getWinningPropIdForGroup} = require('../../shared/selectors');
+const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET, ADD_WINNING_PROP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
-const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
-const {adminEmails} = require('../../shared/constants');
+const {adminEmails, propGroupOperators} = require('../../shared/constants');
 
 const {PropTypes} = React;
 @connect(({app}, {route: {auth}}) => ({
   propGroups: app.propGroups.map((pg) =>
     Object.assign({}, pg, {
+      winningPropId: getWinningPropIdForGroup(app, pg.id),
       includedProps: pg.includedProps.map((prop) =>
-        Object.assign({}, prop, {currentLine: calcCurrentPropLine(app, pg.id, prop.id)})
+        Object.assign({}, prop, {
+          currentLine: calcCurrentPropLine(app, pg.id, prop.id)
+        })
       )
     })
   ),
@@ -42,6 +45,13 @@ class PropList extends React.Component {
     });
   }
 
+  handleSavePropGroupEdit(propGroup) {
+    socket.sendAction({
+      type: EDIT_PROP_GROUP,
+      payload: propGroup
+    });
+  }
+
   handlePlaceBet(propGroupId, propId, bubbles) {
     socket.sendAction({
       type: PLACE_BET,
@@ -53,6 +63,15 @@ class PropList extends React.Component {
     });
   }
 
+  handleAddWinningProp(propGroupId, propId) {
+    socket.sendAction({
+      type: ADD_WINNING_PROP,
+      payload: {
+        propGroupId,
+        propId
+      }
+    });
+  }
 
   render() {
     return (
@@ -66,16 +85,20 @@ class PropList extends React.Component {
         }
         {
           this.props.propGroups.map((pg, i) =>
-          <ReadonlyPropGroup
-            key={pg.id}
-            id={pg.id}
-            groupNumber={this.props.propGroups.length - i}
-            operator={pg.operator}
-            interest={pg.interest}
-            includedProps={pg.includedProps}
-            onPlaceBet={this.handlePlaceBet}
-            isLoggedIn={this.props.isLoggedIn}
-          />
+            <PropGroupWrapper
+              key={pg.id}
+              id={pg.id}
+              onSave={this.handleSavePropGroupEdit}
+              groupNumber={this.props.propGroups.length - i}
+              operator={pg.operator}
+              interest={pg.interest}
+              includedProps={pg.includedProps}
+              winningPropId={pg.winningPropId}
+              onPlaceBet={this.handlePlaceBet}
+              isAdmin={this.props.isAdmin}
+              isLoggedIn={this.props.isLoggedIn}
+              onAddWinningProp={this.handleAddWinningProp}
+            />
           )
         }
       </div>
@@ -91,147 +114,86 @@ const containerStyle = {
 
 module.exports = PropList;
 
-// TODO: move to component directory
-class ReadonlyPropGroup extends React.Component {
+@autobind
+class PropGroupWrapper extends React.Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
+    isAdmin: PropTypes.bool.isRequired,
     groupNumber: PropTypes.number.isRequired,
     operator: PropTypes.oneOf(_.values(propGroupOperators)).isRequired,
     interest: PropTypes.number.isRequired,
+    onSave: PropTypes.func.isRequired,
     includedProps: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.number.isRequired,
       description: PropTypes.string.isRequired,
       startingLine: PropTypes.number.isRequired,
       currentLine: PropTypes.number.isRequired
     })).isRequired,
+    winningPropId: PropTypes.number,
     onPlaceBet: PropTypes.func.isRequired,
-    isLoggedIn: PropTypes.bool.isRequired
-  }
-
-  render() {
-    // TODO: use selector to get line value
-    return (
-      <div style={propGroupContainerStyle}>
-        <div style={groupLabelStyle}>Group {this.props.groupNumber}</div>
-        <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
-        <div style={operatorStyle}>{this.props.operator}</div>
-        {
-          this.props.includedProps.map(({id: propId, description, currentLine}, index) =>
-            <IncludedProp
-              key={propId}
-              id={propId}
-              description={description}
-              line={currentLine}
-              choiceLabel={multipleChoiceLabels[index]}
-              isLoggedIn={this.props.isLoggedIn}
-              onPlaceBet={(bubbles) =>
-                this.props.onPlaceBet(this.props.id, propId, parseFloat(bubbles))
-              }
-            />
-          )
-        }
-      </div>
-    );
-  }
-}
-
-@autobind
-class IncludedProp extends React.Component {
-  static propTypes = {
-    id: PropTypes.number.isRequired,
-    description: PropTypes.string.isRequired,
-    line: PropTypes.number.isRequired,
-    choiceLabel: PropTypes.string.isRequired,
-    onPlaceBet: PropTypes.func.isRequired,
-    isLoggedIn: PropTypes.bool.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
+    onAddWinningProp: PropTypes.func.isRequired
   }
 
   state = {
-    isInputtingBet: false
+    isEditing: false
   }
 
-  handleToggleBetInput() {
+  handleToggleEditing() {
+    if (!this.props.isAdmin) {
+      return;
+    }
     this.setState({
-      isInputtingBet: !this.state.isInputtingBet
+      isEditing: !this.state.isEditing
     });
   }
 
-  handlePlaceBet(bubbles) {
-    this.props.onPlaceBet(bubbles);
-    this.handleToggleBetInput();
+  handleSavePropGroup(propGroup) {
+    this.props.onSave(Object.assign({}, propGroup, {
+      id: this.props.id
+    }));
+    this.handleToggleEditing();
+  }
+
+  handleAddWinningProp(propId) {
+    this.props.onAddWinningProp(this.props.id, propId);
   }
 
   render() {
     const {props} = this;
     return (
-      <div style={propContainer}>
-        <div
-          style={props.isLoggedIn ? disabledPropRowStyle : enabledPropRowStyle}
-          onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
-        >
-          <div style={propItemStyle}>{props.choiceLabel}</div>
-          <div style={propItemStyle}>{props.description}</div>
-          <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
-        </div>
+      <div style={propGroupContainerStyle}>
         {
-           this.state.isInputtingBet
-            ? <PropBetInput
-                alignmentStyle={{paddingLeft: '15px'}}
-                onPlaceBet={this.handlePlaceBet}
-                onCancel={this.handleToggleBetInput}
-                currentBubbleBalance={0}
+          this.state.isEditing
+            ? <EditablePropGroup
+                onSave={this.handleSavePropGroup}
+                onCancel={this.handleToggleEditing}
+                propGroup={{
+                  operator: props.operator,
+                  interest: props.interest,
+                  includedProps: props.includedProps
+                }}
               />
-            : null
+            : <ReadonlyPropGroup
+                id={props.id}
+                onStartAdminEdit={this.handleToggleEditing}
+                groupNumber={props.groupNumber}
+                operator={props.operator}
+                interest={props.interest}
+                includedProps={props.includedProps}
+                onPlaceBet={props.onPlaceBet}
+                isLoggedIn={props.isLoggedIn}
+                isAdmin={props.isAdmin}
+                onAddWinningProp={this.handleAddWinningProp}
+                winningPropId={props.winningPropId}
+              />
         }
       </div>
     );
   }
 }
 
-const topSpacing = '10px';
-
 const propGroupContainerStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  paddingBottom: '20px'
-};
-
-const groupLabelStyle = {
-  fontWeight: '400',
-  paddingBotton: '5px'
-};
-
-const enabledPropRowStyle = {
-  display: 'flex',
-  flexDirection: 'row',
-  paddingTop: topSpacing,
-  paddingLeft: '15px'
-};
-
-const disabledPropRowStyle = Object.assign({}, enabledPropRowStyle, {
-  cursor: 'pointer'
-});
-
-const propItemStyle = {
-  marginRight: '10px'
-};
-
-const interestStyle = {
-  paddingTop: topSpacing,
-  color: '#777'
-};
-
-const operatorStyle = {
-  paddingTop: '10px'
-};
-
-const propContainer = {
   display: 'flex',
   flexDirection: 'column'
 };
-
-function formatInterestValue(interest) {
-  return interest > 0
-    ?  'Interest ' + interest * 100 + '%'
-    : 'No interest';
-}

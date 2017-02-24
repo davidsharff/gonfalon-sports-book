@@ -24,10 +24,18 @@ function getInitialState() {
     app: {
       users: [],
       propGroups: [],
-      bets: []
+      bets: [],
+      winningProps: []
     }
   };
-  const savedState = fs.readFileSync(path.resolve(__dirname, '../../app-state.json'), {encoding: 'utf-8'});
+  let savedState;
+  try {
+    savedState = fs.readFileSync(path.resolve(__dirname, '../../app-state.json'), {encoding: 'utf-8'});
+  } catch (e) {
+    if (e.code !== 'ENOENT' /* ok if file does not exist*/) {
+      throw e;
+    }
+  }
   return savedState
     ? JSON.parse(savedState)
     : initialState;
