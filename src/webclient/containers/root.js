@@ -10,7 +10,7 @@ const {getUserBubbleBalance} = require('../../shared/selectors');
   handleLogin: auth.login,
   handleLogout: auth.logout,
   hasAppState: !_.isEmpty(app),
-  userBubbleBalance: getUserBubbleBalance(app, auth.getEmail())
+  userBubbleBalance: getUserBubbleBalance(app, auth.getUsername())
 }))
 class Root extends React.Component {
   static propTypes = {

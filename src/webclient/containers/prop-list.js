@@ -10,7 +10,7 @@ const EditablePropGroup = require('../components/editable-prop-group');
 const {calcCurrentPropLine, getWinningPropIdForGroup, getUserBubbleBalance} = require('../../shared/selectors');
 const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET, ADD_WINNING_PROP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
-const {adminEmails, propGroupOperators} = require('../../shared/constants');
+const {adminUsernames, propGroupOperators} = require('../../shared/constants');
 
 const {PropTypes} = React;
 @connect(({app}, {route: {auth}}) => ({
@@ -25,9 +25,9 @@ const {PropTypes} = React;
     })
   ),
   // Easily spoofed but all admin actions verified on server.
-  isAdmin: adminEmails.indexOf(localStorage.getItem('email')) > -1,
+  isAdmin: adminUsernames.indexOf(auth.getUsername()) > -1,
   isLoggedIn: auth.loggedIn(),
-  userBubbleBalance: getUserBubbleBalance(app, auth.getEmail())
+  userBubbleBalance: getUserBubbleBalance(app, auth.getUsername())
 }))
 @autobind
 class PropList extends React.Component {

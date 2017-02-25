@@ -13,6 +13,7 @@ class HeaderBar extends React.Component {
     userBubbleBalance: React.PropTypes.number
   };
   render() {
+    // TODO: add handle redirect logins to root before calling authLock.
     return (
       <div style={headerRowStyle}>
         <div style={mainTitleStyle}>
