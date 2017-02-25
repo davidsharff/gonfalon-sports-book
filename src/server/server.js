@@ -10,13 +10,7 @@ const DIST_PATH = path.resolve(__dirname, '../../public/');
 
 const app = express();
 
-// TODO: problems with gzip (not encoding?). Bring back -prod arg for server and client build when fixed.
-// if (!getArgs().isDevEnv) {
-//   app.use(/\/static\/.*\.(js|css|html)(\?.*)?$/, (req, res, next) => {
-//     res.set('Content-Encoding', 'gzip');
-//     next();
-//   });
-// }
+// TODO: add gzip eventually.
 
 // Serve static files.
 app.use('/static/', express.static(path.join(DIST_PATH, 'static'), {

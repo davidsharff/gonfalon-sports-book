@@ -4,10 +4,8 @@
 const path = require('path');
 const SplitByPathPlugin = require('webpack-split-by-path');
 const webpack = require('webpack');
-const CompressionPlugin = require('compression-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const args = require('./webpack-args');
-
 module.exports = {
   entry: {
     index: path.resolve(__dirname, 'src/webclient/index.js')
@@ -43,13 +41,7 @@ module.exports = {
     }),
     ...(args.isDevEnv
       ? [new webpack.SourceMapDevToolPlugin()]
-      : [
-        new webpack.optimize.UglifyJsPlugin(),
-        new CompressionPlugin({
-          asset: '{file}',
-          test: /\.js$|\.html|\.css$/ // Must match server pattern
-        })
-      ]
+      : [new webpack.optimize.UglifyJsPlugin()]
     )
   ],
   module: {
