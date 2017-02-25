@@ -187,7 +187,7 @@ const lineInputStyle = {
 
 const newPropButtonStyle = {
   marginTop: '15px',
-  maxWidth: '100px'
+  maxWidth: '170px'
 };
 
 module.exports = EditablePropGroup;

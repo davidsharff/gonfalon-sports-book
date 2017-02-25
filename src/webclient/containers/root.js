@@ -44,7 +44,5 @@ module.exports = Root;
 
 const rootContainerStyle = {
   display: 'flex',
-  flexDirection: 'column',
-  fontFamily: 'Helvetica Neue,Helvetica,Arial,sans-serif',
-  fontWeight: '300'
+  flexDirection: 'column'
 };

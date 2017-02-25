@@ -204,7 +204,7 @@ const basePropContainerStyle = {
 const markAsWonStyle = {
   marginLeft: '15px',
   marginTop: '10px',
-  maxWidth: '100px'
+  maxWidth: '170px'
 };
 
 const winningPropContainerStyle = Object.assign({}, basePropContainerStyle, {
