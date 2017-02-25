@@ -1,10 +1,10 @@
 'use strict';
 const _ = require('lodash');
 
-function getEmailForUserId(state, userId) {
-  return _.find(state.local.authUsers, {userId}).email;
+function getUsernameForUserId(state, userId) {
+  return _.find(state.local.authUsers, {userId}).username;
 }
 
 module.exports = {
-  getEmailForUserId
+  getUsernameForUserId
 };

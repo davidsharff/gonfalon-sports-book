@@ -3,7 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <title>Gonfalon Sports Book</title>
-  <!--Stylesheets Injected Here-->
+  <script src="https://use.fontawesome.com/5747e00316.js"></script>
+  <style type="text/css">
+    body {
+      font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+      font-weight: 300;
+    }
+    button {
+      font-size: 10pt;
+      font-weight: 300;
+      border-radius: 20px;
+      padding: 3px 15px;
+      border: 0;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      border: 1px solid;
+      background-color: transparent;
+    }
+    button:hover {
+      background-color: #eee;
+    }
+    button:focus {
+      outline:0;
+    }
+    button:disabled {
+      color: #aaa;
+      cursor: default;
+    }
+    button:disabled:hover {
+      background-color: transparent; /* Turn off hover effect */
+    }
+    i {
+      color: #aaa;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+    i:hover {
+      color: #555;
+    }
+    i:disabled {
+      color: #eee;
+      cursor: default;
+    }
+  </style>
+
 </head>
 <body>
 <div id="app"></div>

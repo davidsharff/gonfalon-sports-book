@@ -4,10 +4,10 @@ const _ = require('lodash');
 const autobind = require('autobind-decorator');
 const moment = require('moment');
 const store = require('./store');
-const {getEmailForUserId} = require('./selectors');
+const {getUsernameForUserId} = require('./selectors');
 const {ADD_NEW_USER_ID, ADD_NEW_USER} = require('./action-types');
 const sharedActionTypes = require('../shared/action-types');
-const {STARTING_BUBBLES, adminEmails} = require('../shared/constants');
+const {STARTING_BUBBLES, adminUsernames} = require('../shared/constants');
 const {calcCurrentPropLine} = require('../shared/selectors');
 
 let clients = [];
@@ -43,15 +43,15 @@ class Client {
 
     // TODO: move these middleware things to middleware
     if (action.type === sharedActionTypes.NOTIFY_AUTHENTICATION) {
-      this._handleAuthentication(action.payload.userId, action.payload.email);
+      this._handleAuthentication(action.payload.userId, action.payload.username);
 
     } else if (action.type === sharedActionTypes.PLACE_BET) {
       const {payload} = action;
       action = Object.assign({}, action, {
         payload: Object.assign({}, payload, {
-          email: getEmailForUserId(store.getState(), this.getUserId()),
+          username: getUsernameForUserId(store.getState(), this.getUserId()),
           msTimeStamp: moment().format('x'),
-          // TODO: got to be a better way of doing this. Balk and notifying user if the line changed since submission?
+          // TODO: got to be a better way of doing this. Balk and notify user if the line changed since submission?
           effectiveLine: calcCurrentPropLine(store.getState().app, payload.propGroupId, payload.propId)
         })
       });
@@ -71,23 +71,30 @@ class Client {
     clients = clients.filter((c) => c !== this);
   }
 
-  _handleAuthentication(userId, email) {
+  _handleAuthentication(userId, username) {
     this._setUserId(userId);
     const {authUsers} = store.getState().local;
     const authUser = _.find(authUsers, {userId});
+
+    if (authUser && authUser.username !== username) {
+      // TODO: Throwing for now. We need to update applicable state with new username.
+      // Drunk on liberty, we could no longer handle the freedom afforded to us by the editability of our twitter handles.
+      throw new Error(`New username for existing user. userId: ${userId} old username: ${authUser.username} new username: ${username}`);
+    }
+
     if (!authUser) {
-      console.log(`New user: ${email}`);
+      console.log(`New user: ${username}`);
       store.dispatch({
         type: ADD_NEW_USER_ID,
         payload: {
-          email,
+          username,
           userId
         }
       });
       store.dispatch({
         type: ADD_NEW_USER,
         payload: {
-          email,
+          username,
           startingBubbles: STARTING_BUBBLES
         }
       });
@@ -132,7 +139,7 @@ function hasPermissionForAdminActions(actionType, userId) {
   ];
   if (adminActions.indexOf(actionType) > -1) {
     const authUser = _.find(store.getState().local.authUsers, {userId});
-    if (!authUser || adminEmails.indexOf(authUser.email) === -1) {
+    if (!authUser || adminUsernames.indexOf(authUser.username) === -1) {
       return false;
     }
   }

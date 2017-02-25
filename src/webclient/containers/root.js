@@ -10,7 +10,7 @@ const {getUserBubbleBalance} = require('../../shared/selectors');
   handleLogin: auth.login,
   handleLogout: auth.logout,
   hasAppState: !_.isEmpty(app),
-  userBubbleBalance: getUserBubbleBalance(app, auth.getEmail())
+  userBubbleBalance: getUserBubbleBalance(app, auth.getUsername())
 }))
 class Root extends React.Component {
   static propTypes = {
@@ -44,7 +44,5 @@ module.exports = Root;
 
 const rootContainerStyle = {
   display: 'flex',
-  flexDirection: 'column',
-  fontFamily: 'Helvetica Neue,Helvetica,Arial,sans-serif',
-  fontWeight: '300'
+  flexDirection: 'column'
 };

@@ -26,14 +26,13 @@ argParser.addArgument(
   }
 );
 
-// TODO: waiting on gzip fix on server.
-// argParser.addArgument(
-//   ['-prod', '--production'],
-//   {
-//     help: 'Run in production mode',
-//     action: 'storeTrue'
-//   }
-// );
+argParser.addArgument(
+  ['-prod', '--production'],
+  {
+    help: 'Run in production mode',
+    action: 'storeTrue'
+  }
+);
 
 let args = argParser.parseArgs();
 
@@ -42,16 +41,11 @@ if (args.production && args.development) {
   process.exit();
 }
 
-if (args.production && args.shouldCheckConstraints) {
-  console.error('Constraint checker is forbidden in production');
-  process.exit();
-}
-
 const isDevEnv = args.development || args.production
   ? args.development
   : (NODE_ENV ? NODE_ENV === 'development' : true);
 
 module.exports = {
-  target: args.target || isDevEnv ? 'modern' : 'compatible',
+  target: args.target || (isDevEnv ? 'modern' : 'compatible'),
   isDevEnv
 };

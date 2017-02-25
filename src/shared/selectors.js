@@ -28,10 +28,12 @@ function getWinningPropIdForGroup(appState, propGroupId) {
   return winningPropRecord ? winningPropRecord.propId : null;
 }
 
-function getUserBubbleBalance(appState, email) { // TODO: change to userId since we don't know if it will be email/twitter/etc.
-  const user = _.find(appState.users, {email});
+function getUserBubbleBalance(appState, username) {
+  const user = _.find(appState.users, {username});
   return user
-    ? user.startingBubbles - getUserTotalBets(appState, email)
+    ? user.startingBubbles -
+      calcAllBubblesBetForUser(appState, username) +
+      calcTotalWinningsForUser(appState, username)
     : null;
 }
 
@@ -43,8 +45,28 @@ module.exports = {
   getUserBubbleBalance
 };
 
-function getUserTotalBets(appState, email) {
+function calcAllBubblesBetForUser(appState, username) {
   return _(appState.bets)
-    .filter({email})
+    .filter({username})
     .sumBy('bubbles');
+}
+
+function calcTotalWinningsForUser(appState, username) {
+  const allBetsForUser = _.filter(appState.bets, {username});
+  return _.sumBy(appState.winningProps, (wp) =>
+    // Note: users can have multiple bets for the same prop.
+    _.sumBy(allBetsForUser, ({propId, bubbles, effectiveLine}) =>
+      propId === wp.propId
+        ? bubbles + calcProfitForBet(bubbles, effectiveLine)
+        : 0
+    )
+  );
+}
+
+function calcProfitForBet(bubbles, effectiveLine) {
+  return Math.round(
+    effectiveLine > 0
+      ? bubbles * (effectiveLine / 100)
+      : bubbles / (Math.abs(effectiveLine) / 100)
+  );
 }

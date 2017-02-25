@@ -103,6 +103,7 @@ class EditablePropGroup extends React.Component {
               value={this.state.operator}
               onChange={this.handleOperatorChange}
             >
+              <option />
               {
                 _.map(_.values(propGroupOperators), (o) =>
                   <option key={o} value={o}>{o}</option>
@@ -187,7 +188,7 @@ const lineInputStyle = {
 
 const newPropButtonStyle = {
   marginTop: '15px',
-  maxWidth: '100px'
+  maxWidth: '170px'
 };
 
 module.exports = EditablePropGroup;

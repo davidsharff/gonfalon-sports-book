@@ -2,9 +2,12 @@
 
 const React = require('react');
 const {Link} = require('react-router');
+const {routeActions} = require('react-router-redux');
+const autobind = require('autobind-decorator');
+const store = require('../store');
 const styles = require('../styles');
 
-
+@autobind
 class HeaderBar extends React.Component {
   static propTypes = {
     isAuthenticated: React.PropTypes.bool.isRequired,
@@ -12,7 +15,14 @@ class HeaderBar extends React.Component {
     onLogout: React.PropTypes.func,
     userBubbleBalance: React.PropTypes.number
   };
+
+  handleLogin() {
+    this.props.onLogin();
+    store.dispatch(routeActions.replace({pathName: '/'}));
+  }
+
   render() {
+    // TODO: add handle redirect logins to root before calling authLock.
     return (
       <div style={headerRowStyle}>
         <div style={mainTitleStyle}>
@@ -31,7 +41,7 @@ class HeaderBar extends React.Component {
             {
               this.props.isAuthenticated
                 ? <div style={linkActiveStyle} onClick={this.props.onLogout}>Logout</div>
-                : <div style={linkActiveStyle} onClick={this.props.onLogin}>Login</div>
+                : <div style={linkActiveStyle} onClick={this.handleLogin}>Login</div>
             }
           </div>
         </div>

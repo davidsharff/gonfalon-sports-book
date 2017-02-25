@@ -36,16 +36,23 @@ class ReadonlyPropGroup extends React.Component {
   }
 
   render() {
-    const groupLabelStyle = this.props.isAdmin && !this.props.winningPropId
-      ? adminGroupLabelStyle
-      : baseGroupLabelStyle;
     return (
       <div style={propGroupContainerStyle}>
-        <div style={groupLabelStyle} onClick={this.handleStartEdit}>
-          Group {this.props.groupNumber}
+        <div style={groupLabelStyle}>
+          <span>Group {this.props.groupNumber}</span>
+          {
+            this.props.isAdmin
+              ? <i
+                  style={pencilIconStyle}
+                  className="fa fa-pencil"
+                  aria-hidden="true"
+                  onClick={this.handleStartEdit}
+                />
+              : null
+          }
         </div>
-        <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         <div style={operatorStyle}>{this.props.operator}</div>
+        <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         {
           this.props.includedProps.map(({id: propId, description, currentLine}, index) =>
             <IncludedProp
@@ -162,14 +169,10 @@ const propGroupContainerStyle = {
   paddingBottom: '20px'
 };
 
-const baseGroupLabelStyle = {
+const groupLabelStyle = {
   fontWeight: '400',
   paddingBotton: '5px'
 };
-
-const adminGroupLabelStyle = Object.assign({}, baseGroupLabelStyle, {
-  cursor: 'pointer'
-});
 
 const enabledPropRowStyle = {
   display: 'flex',
@@ -203,8 +206,8 @@ const basePropContainerStyle = {
 
 const markAsWonStyle = {
   marginLeft: '15px',
-  marginTop: '10px',
-  maxWidth: '100px'
+  marginTop: '5px',
+  maxWidth: '170px'
 };
 
 const winningPropContainerStyle = Object.assign({}, basePropContainerStyle, {
@@ -214,6 +217,10 @@ const winningPropContainerStyle = Object.assign({}, basePropContainerStyle, {
 const losingPropContainerStyle = Object.assign({}, basePropContainerStyle, {
   color: '#aaa'
 });
+
+const pencilIconStyle = {
+  paddingLeft: '15px'
+};
 
 module.exports = ReadonlyPropGroup;
 

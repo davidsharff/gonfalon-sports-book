@@ -44,21 +44,17 @@ function parseArgs() {
     }
   );
 
-  // TODO: waiting on gzip fix on server.
-  // argParser.addArgument(
-  //   ['-prod', '--production'],
-  //   {
-  //     help: 'Run in production mode',
-  //     action: 'storeTrue'
-  //   }
-  // );
+  argParser.addArgument(
+    ['-prod', '--production'],
+    {
+      help: 'Run in production mode',
+      action: 'storeTrue'
+    }
+  );
 
   const args = argParser.parseArgs();
 
-  if (args.production && args.development) {
-    console.error('Both production and development modes were specified');
-    process.exit();
-  }
+  process.env.NODE_ENV = args.production ? 'production' : 'development';
 
   return {
     port: parseInt(args.port),

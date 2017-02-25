@@ -16,6 +16,7 @@ class AuthService {
   }
 
   _doAuthentication(authResult) {
+    const that = this;
     this.setToken(authResult.idToken);
 
     localStorage.setItem('access_token', authResult.accessToken);
@@ -25,15 +26,16 @@ class AuthService {
         console.error(error);
         return;
       }
-      localStorage.setItem('email', profile.email);
+      localStorage.setItem('username', that._getUsernameForProfile(profile));
     });
+    this.sendServerAuthDetails(); // TODO: clean this up to avoid second call to auth0
 
-    this.sendServerAuthDetails();
     // TODO: this isn't serving it's purpose. We are still blowing up for unallowed login callback urls.
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
   sendServerAuthDetails() {
+    const that = this;
     this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
       if (error) {
         console.error(error);
@@ -43,10 +45,22 @@ class AuthService {
         type: NOTIFY_AUTHENTICATION,
         payload: {
           userId: profile.user_id,
-          email: profile.email
+          username: that._getUsernameForProfile(profile)
         }
       });
     });
+  }
+
+  _getUsernameForProfile(profile) {
+    const username = profile.user_id.startsWith('twitter')
+      ? profile.screen_name
+      : profile.email;
+
+    if (!username) {
+      // TODO: it would be nice to collect this info on server. Send a new action type for server logging.
+      throw new Error(`Could not determine username. User_id: ${profile.user_id} Name: ${profile.name}`);
+    }
+    return username;
   }
 
   login() {
@@ -65,14 +79,14 @@ class AuthService {
     return localStorage.getItem('id_token');
   }
 
-  getEmail() {
-    return localStorage.getItem('email');
+  getUsername() {
+    return localStorage.getItem('username');
   }
 
   logout() {
     localStorage.removeItem('id_token');
     localStorage.removeItem('access_token');
-    localStorage.removeItem('email');
+    localStorage.removeItem('username');
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 

@@ -10,7 +10,7 @@ const {
 const {PropTypes} = React;
 
 @connect(({app}, {route: {auth}}) => ({
-  email: auth.getEmail(),
+  username: auth.getUsername(),
   bets: app.bets.map((b) =>
     Object.assign({}, b, {
       propGroupLabel: getPropGroupLabel(app, b.propGroupId),
@@ -21,7 +21,7 @@ const {PropTypes} = React;
 
 class BetList extends React.Component {
   static propTypes = {
-    email: PropTypes.string,
+    username: PropTypes.string,
     bets: PropTypes.arrayOf(PropTypes.shape({
       bubbles: PropTypes.number.isRequired,
       propId: PropTypes.number.isRequired,
@@ -29,7 +29,7 @@ class BetList extends React.Component {
       propGroupId: PropTypes.number.isRequired,
       propGroupLabel: PropTypes.string.isRequired,
       effectiveLine: PropTypes.number.isRequired,
-      email: PropTypes.string.isRequired,
+      username: PropTypes.string.isRequired,
       msTimeStamp: PropTypes.string.isRequired
     }))
   }
@@ -49,8 +49,8 @@ class BetList extends React.Component {
         {
           this.props.bets.map((bet, i) =>
             <div key={bet.msTimeStamp} style={i % 2 === 0 ? rowStyle : oddRowStyle}>
-              <div style={bet.email === this.props.email ? userEmailCellStyle : cellStyle}>
-                {bet.email}
+              <div style={bet.username === this.props.username ? usernameCellStyle : cellStyle}>
+                {bet.username}
               </div>
               <div style={cellStyle}>{bet.bubbles}</div>
               <div style={cellStyle}>{bet.propGroupLabel}</div>
@@ -89,7 +89,7 @@ const cellStyle = {
   overflow: 'hidden'
 };
 
-const userEmailCellStyle = Object.assign({}, cellStyle, {
+const usernameCellStyle = Object.assign({}, cellStyle, {
   fontStyle: 'italic'
 });
 
