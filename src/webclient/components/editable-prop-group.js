@@ -103,6 +103,7 @@ class EditablePropGroup extends React.Component {
               value={this.state.operator}
               onChange={this.handleOperatorChange}
             >
+              <option />
               {
                 _.map(_.values(propGroupOperators), (o) =>
                   <option key={o} value={o}>{o}</option>
