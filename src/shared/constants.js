@@ -9,7 +9,10 @@ module.exports = {
   STARTING_BUBBLES: 1000,
   adminUsernames: [
     'davesharff@gmail.com',
+    'davidsharff',
     'NateMeyvis',
-    'mattsienkiewicz@gmail.com'
+    'mediastudied',
+    'tlaynec@gmail.com',
+    'ghstrp'
   ]
 };
