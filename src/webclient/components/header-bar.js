@@ -26,7 +26,7 @@ class HeaderBar extends React.Component {
     return (
       <div style={headerRowStyle}>
         <div style={mainTitleStyle}>
-          Gonfalon Sportsbook
+          Gonfalon Sportsbook (beta)
         </div>
         <div>
           {
