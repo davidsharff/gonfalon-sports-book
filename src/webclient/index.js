@@ -20,7 +20,7 @@ const BetList = require('./containers/bet-list');
 const auth = new AuthService('iLsffrD705FgUGVPTgYryl5ga0Ey5CUG', 'gonfalon-sports-book.auth0.com');
 
 if (auth.loggedIn()) {
-  auth.sendServerAuthDetails();
+  socket.onOpen(() => auth.sendServerAuthDetails());
 }
 
 socket.onMessage(({data: action}) => store.dispatch(JSON.parse(action)));

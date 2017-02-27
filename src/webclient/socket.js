@@ -14,7 +14,12 @@ function onMessage(cb) {
   ws.onmessage = cb;
 }
 
+function onOpen(cb) {
+  ws.onopen = cb;
+}
+
 module.exports = {
+  onOpen: onOpen,
   onMessage: onMessage,
   sendAction
 };
