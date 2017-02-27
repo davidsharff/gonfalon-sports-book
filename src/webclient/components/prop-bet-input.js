@@ -20,7 +20,10 @@ class PropBetInput extends React.Component {
 
   handleBubbleInput(e) {
     this.setState({
-      bubbleInputValue: e.target.value
+      bubbleInputValue: Math.min(
+        parseInt(e.target.value),
+        this.props.currentBubbleBalance
+      )
     });
   }
 
