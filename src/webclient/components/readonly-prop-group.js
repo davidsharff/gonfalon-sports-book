@@ -41,7 +41,7 @@ class ReadonlyPropGroup extends React.Component {
         <div style={groupLabelStyle}>
           <span>Group {this.props.groupNumber}</span>
           {
-            this.props.isAdmin
+            this.props.isAdmin && !this.props.winningPropId
               ? <i
                   style={pencilIconStyle}
                   className="fa fa-pencil"
