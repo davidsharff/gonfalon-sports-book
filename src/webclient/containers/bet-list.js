@@ -40,11 +40,11 @@ class BetList extends React.Component {
       <div style={containerStyle}>
         <div style={rowStyle}>
           <div style={headerCellStyle}>User</div>
-          <div style={headerCellStyle}>Bubbles</div>
-          <div style={headerCellStyle}>Prop Group</div>
-          <div style={headerCellStyle}>Prop Label</div>
-          <div style={headerCellStyle}>Effective Line</div>
-          <div style={headerCellStyle}>Date/Time</div>
+          <div style={rightAlignedHeaderStyle}>Bubbles</div>
+          <div style={rightAlignedHeaderStyle}>Prop Group</div>
+          <div style={rightAlignedHeaderStyle}>Prop Label</div>
+          <div style={rightAlignedHeaderStyle}>Effective Line</div>
+          <div style={rightAlignedHeaderStyle}>Date/Time</div>
         </div>
         {
           this.props.bets.map((bet, i) =>
@@ -52,11 +52,11 @@ class BetList extends React.Component {
               <div style={bet.username === this.props.username ? usernameCellStyle : cellStyle}>
                 {bet.username}
               </div>
-              <div style={cellStyle}>{bet.bubbles}</div>
-              <div style={cellStyle}>{bet.propGroupLabel}</div>
-              <div style={cellStyle}>{bet.propLabel}</div>
-              <div style={cellStyle}>{bet.effectiveLine}</div>
-              <div style={cellStyle}>{moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD hh:mm')}</div>
+              <div style={rightAlignedCellStyle}>{bet.bubbles}</div>
+              <div style={rightAlignedCellStyle}>{bet.propGroupLabel}</div>
+              <div style={rightAlignedCellStyle}>{bet.propLabel}</div>
+              <div style={rightAlignedCellStyle}>{bet.effectiveLine}</div>
+              <div style={rightAlignedCellStyle}>{moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD hh:mm')}</div>
             </div>
           )
         }
@@ -83,18 +83,24 @@ const oddRowStyle = Object.assign({}, rowStyle, {
 });
 
 const cellStyle = {
-  width: '300px',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  overflow: 'hidden'
+  overflow: 'hidden',
+  flex: 1
 };
 
 const usernameCellStyle = Object.assign({}, cellStyle, {
   fontStyle: 'italic'
 });
 
+const rightAlignedCellStyle = Object.assign({}, cellStyle, {
+  textAlign: 'right'
+});
+
 const headerCellStyle = Object.assign({}, cellStyle, {
   fontWeight: '400'
 });
+
+const rightAlignedHeaderStyle = Object.assign({}, headerCellStyle, rightAlignedCellStyle);
 
 module.exports = BetList;
