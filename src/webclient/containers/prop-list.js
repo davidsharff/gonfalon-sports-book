@@ -76,7 +76,6 @@ class PropList extends React.Component {
   }
 
   render() {
-    console.log(this.props.userBubbleBalance);
     return (
       <div style={containerStyle}>
         {
