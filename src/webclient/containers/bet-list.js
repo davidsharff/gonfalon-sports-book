@@ -48,7 +48,9 @@ class BetList extends React.Component {
         </div>
         {
           this.props.bets.map((bet, i) =>
-            <div key={bet.msTimeStamp} style={i % 2 === 0 ? rowStyle : oddRowStyle}>
+            <div key={bet.msTimeStamp + i/*Legacy bets have identical stamp because of site epoch*/}
+                 style={i % 2 === 0 ? rowStyle : oddRowStyle}
+            >
               <div style={bet.username === this.props.username ? usernameCellStyle : cellStyle}>
                 {bet.username}
               </div>
