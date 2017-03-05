@@ -58,7 +58,13 @@ class BetList extends React.Component {
               <div style={rightAlignedCellStyle}>{bet.propGroupLabel}</div>
               <div style={rightAlignedCellStyle}>{bet.propLabel}</div>
               <div style={rightAlignedCellStyle}>{bet.effectiveLine}</div>
-              <div style={rightAlignedCellStyle}>{moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD hh:mm')}</div>
+              <div style={rightAlignedCellStyle}>
+                {
+                  bet.msTimeStamp === '1488653041267'
+                    ? 'Legacy Bet'
+                    : moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD hh:mm')
+                }
+                </div>
             </div>
           )
         }
