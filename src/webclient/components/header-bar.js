@@ -17,8 +17,8 @@ class HeaderBar extends React.Component {
   };
 
   handleLogin() {
-    this.props.onLogin();
     store.dispatch(routeActions.replace({pathName: '/'}));
+    this.props.onLogin();
   }
 
   render() {
