@@ -25,9 +25,9 @@ class HeaderBar extends React.Component {
     // TODO: add handle redirect logins to root before calling authLock.
     return (
       <div style={headerRowStyle}>
-        <div style={mainTitleStyle}>
+        <Link to="/" style={mainTitleStyle}>
           Gonfalon Sportsbook (beta)
-        </div>
+        </Link>
         <div>
           {
             this.props.userBubbleBalance !== null
@@ -37,7 +37,6 @@ class HeaderBar extends React.Component {
           <div style={linksContainerStyle}>
             <Link style={linkActiveStyle} to="/props">Props</Link>
             <Link style={linkActiveStyle} to="/bets">Live Bets</Link>
-            <Link style={linkDisabledStyle} to="/">About</Link>
             {
               this.props.isAuthenticated
                 ? <div style={linkActiveStyle} onClick={this.props.onLogout}>Logout</div>
@@ -60,8 +59,6 @@ const headerRowStyle = {
   borderBottomColor: '#aaa',
   borderBottomStyle: 'solid',
   borderBottomWidth: '1px',
-  marginLeft: '10px',
-  marginRight: '10px',
   padding: '10px 0 10px 0'
 };
 
@@ -82,8 +79,6 @@ const linkItemStyle = {
 };
 
 const linkActiveStyle =  Object.assign({}, linkItemStyle, styles.linkActive);
-
-const linkDisabledStyle =  Object.assign({}, linkItemStyle, styles.linkDisabled);
 
 const mainTitleStyle = Object.assign({}, styles.linkActive, {
   fontSize: '16pt',
