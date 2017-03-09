@@ -44,7 +44,7 @@ class BetList extends React.Component {
           <div style={rightAlignedHeaderStyle}>Prop Group</div>
           <div style={rightAlignedHeaderStyle}>Prop Label</div>
           <div style={rightAlignedHeaderStyle}>Effective Line</div>
-          <div style={rightAlignedHeaderStyle}>Date/Time</div>
+          <div style={rightAlignedHeaderStyle}>Date</div>
         </div>
         {
           this.props.bets.map((bet, i) =>
@@ -62,7 +62,7 @@ class BetList extends React.Component {
                 {
                   bet.msTimeStamp === '1488653041267'
                     ? 'Legacy Bet'
-                    : moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD hh:mm')
+                    : moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD')
                 }
                 </div>
             </div>
