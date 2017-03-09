@@ -35,6 +35,14 @@ class Root extends React.Component {
             ? this.props.children
             : null
         }
+        {
+          !this.props.children /* TODO: move to component and use route. */
+            ? <div style={descriptionStyle}>
+                Welcome to the Gonfalon Sportsbook. For more information, visit the project's source
+                on the <a href="http://gonfalonbubble.com/?p=28">Gonfalon Bubble</a> blog.
+              </div>
+            : null
+        }
       </div>
     );
   }
@@ -44,5 +52,10 @@ module.exports = Root;
 
 const rootContainerStyle = {
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  margin: '10px'
+};
+
+const descriptionStyle = {
+  paddingTop: '5px'
 };

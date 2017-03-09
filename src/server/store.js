@@ -25,7 +25,8 @@ function getInitialState() {
       users: [],
       propGroups: [],
       bets: [],
-      winningProps: []
+      winningProps: [],
+      prizes: []
     }
   };
   let savedState;
