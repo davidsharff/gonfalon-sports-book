@@ -35,10 +35,14 @@ class Root extends React.Component {
             ? this.props.children
             : null
         }
-        <div style={descriptionStyle}>
-          Welcome to the Gonfalon Sportsbook. For more information, visit the project's source
-          on the <a href="http://gonfalonbubble.com/?p=28">Gonfalon Bubble</a> blog.
-        </div>
+        {
+          !this.props.children /* TODO: move to component and use route. */
+            ? <div style={descriptionStyle}>
+                Welcome to the Gonfalon Sportsbook. For more information, visit the project's source
+                on the <a href="http://gonfalonbubble.com/?p=28">Gonfalon Bubble</a> blog.
+              </div>
+            : null
+        }
       </div>
     );
   }
