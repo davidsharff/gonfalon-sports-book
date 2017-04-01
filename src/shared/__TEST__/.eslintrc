@@ -1,0 +1,7 @@
+{
+  "env": {
+    "mocha": true,
+    "browser": false, // Not Working! See https://github.com/eslint/eslint/issues/3915
+    "node": true
+  }
+}

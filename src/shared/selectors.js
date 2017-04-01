@@ -1,5 +1,6 @@
 'use strict';
 const _ = require('lodash');
+const moment = require('moment');
 const {multipleChoiceLabels} = require('./constants');
 
 function calcCurrentPropLine(appState, propGroupId, propId) {
@@ -33,7 +34,8 @@ function getUserBubbleBalance(appState, username) {
   return user
     ? user.startingBubbles -
       calcAllBubblesBetForUser(appState, username) +
-      calcTotalWinningsForUser(appState, username)
+      calcTotalWinningsForUser(appState, username) +
+      calcTotalInterestPayments(appState, username)
     : null;
 }
 
@@ -42,7 +44,11 @@ module.exports = {
   getPropGroupLabel,
   getPropLabel,
   getWinningPropIdForGroup,
-  getUserBubbleBalance
+  getUserBubbleBalance,
+  _exportsForTests: {
+    calcTotalInterestPayments,
+    calcTotalInterestForBet
+  }
 };
 
 function calcAllBubblesBetForUser(appState, username) {
@@ -69,4 +75,27 @@ function calcProfitForBet(bubbles, effectiveLine) {
       ? bubbles * (effectiveLine / 100)
       : bubbles / (Math.abs(effectiveLine) / 100)
   );
+}
+
+// TODO: add timestamp for winning prop records. Otherwise, we'll calc interest forever!
+function calcTotalInterestPayments(appState, username) {
+  const now = moment();
+  return _.sumBy(appState.bets, (bet) =>
+    bet.username === username
+      ? calcTotalInterestForBet(
+          bet.bubbles,
+          _.find(appState.propGroups, {id: bet.propGroupId}).interest / 100,
+          moment(bet.msTimeStamp, 'x'), // Convert to moment object
+          now
+        )
+      : 0
+  );
+}
+
+function calcTotalInterestForBet(bubblesWagered, interest, betMoment, calcAsOfMoment) {
+  if (!interest || calcAsOfMoment.diff(betMoment) < 0) {
+    return 0;
+  }
+  const interestPerDayValue = interest * 12 / 365; // Sorry astronomical reality, I want Christmas to come a day earlier every 16 years.
+  return Math.round(bubblesWagered * interestPerDayValue * calcAsOfMoment.diff(betMoment, 'days'));
 }
