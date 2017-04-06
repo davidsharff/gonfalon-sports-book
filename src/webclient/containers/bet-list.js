@@ -55,7 +55,7 @@ class BetList extends React.Component {
           <div style={rightAlignedHeaderStyle}>Prop Group</div>
           <div style={rightAlignedHeaderStyle}>Prop Label</div>
           <div style={rightAlignedHeaderStyle}>Effective Line</div>
-          <div style={rightAlignedHeaderStyle}>Interest</div>
+          <div style={rightAlignedHeaderStyle}>Interest %</div>
           <div style={rightAlignedHeaderStyle}>Interest Paid</div>
           <div style={rightAlignedHeaderStyle}>Date</div>
         </div>
@@ -77,7 +77,7 @@ class BetList extends React.Component {
                 {
                   bet.msTimeStamp === '1483250400000'
                     ? 'Legacy Bet'
-                    : moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD')
+                    : moment(bet.msTimeStamp, 'x').format('M-D-YY')
                 }
                 </div>
             </div>
@@ -91,14 +91,16 @@ class BetList extends React.Component {
 const containerStyle = {
   display: 'flex',
   flexDirection: 'column',
-  padding: '20px'
+  padding: '20px',
+  overflow: 'scroll'
 };
 
 const rowStyle = {
   display: 'flex',
   flexDirection: 'row',
   paddingTop: '5px',
-  paddingBottom: '5px'
+  paddingBottom: '5px',
+  minWidth: '850px'
 };
 
 const oddRowStyle = Object.assign({}, rowStyle, {
@@ -109,6 +111,7 @@ const cellStyle = {
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
+  minWidth: '100px',
   flex: 1
 };
 
