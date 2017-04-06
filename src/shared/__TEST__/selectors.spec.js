@@ -2,7 +2,7 @@
 
 const {assert} = require('chai');
 const moment = require('moment');
-const {_exportsForTests: {calcTotalInterestForBet}} = require('../selectors');
+const {calcTotalInterestForBet} = require('../selectors');
 
 // This may be overzealous constantness but my test descs & data got out-of-sync a couple times.
 const DEC_01_2016 = '2016-12-01';

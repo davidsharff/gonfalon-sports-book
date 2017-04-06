@@ -43,16 +43,29 @@ function getPropGroupInterestValue(appState, id) {
   return  _.find(appState.propGroups, {id}).interest / 100;
 }
 
+function getInterestCalcAsOfMoment(appState, propGroupId, propId) {
+  return getWinningPropIdForGroup(appState, propGroupId) === propId
+    ? moment(_.find(appState.winningProps, {propId}).msTimeStamp, 'x')
+    : moment();
+}
+
+function calcTotalInterestForBet(bubblesWagered, interest, betMoment, calcAsOfMoment) {
+  if (!interest || calcAsOfMoment.diff(betMoment) < 0) {
+    return 0;
+  }
+  const interestPerDayValue = interest * 12 / 365; // Sorry astronomical reality, I want Christmas to come a day earlier every 16 years.
+  return Math.round(bubblesWagered * interestPerDayValue * calcAsOfMoment.diff(betMoment, 'days'));
+}
+
 module.exports = {
   calcCurrentPropLine,
   getPropGroupLabel,
   getPropLabel,
   getWinningPropIdForGroup,
   getUserBubbleBalance,
-  _exportsForTests: {
-    calcTotalInterestPayments,
-    calcTotalInterestForBet
-  }
+  calcTotalInterestForBet,
+  getPropGroupInterestValue,
+  getInterestCalcAsOfMoment
 };
 
 function calcAllBubblesBetForUser(appState, username) {
@@ -82,26 +95,15 @@ function calcProfitForBet(bubbles, effectiveLine) {
 }
 
 function calcTotalInterestPayments(appState, username) {
-  const now = moment();
-  return _.sumBy(appState.bets, (bet) => {
-    const calcAsOfDate = getWinningPropIdForGroup(appState, bet.propGroupId) === bet.propId
-      ? moment(_.find(appState.winningProps, {propId: bet.propId}).msTimeStamp, 'x')
-      : now;
-    return bet.username === username
+  return _.sumBy(appState.bets, (bet) =>
+    // TODO: consider adding wrapper to remove burden of getting parameters.
+    bet.username === username
       ? calcTotalInterestForBet(
-          bet.bubbles,
-          getPropGroupInterestValue(appState, bet.propGroupId),
-          moment(bet.msTimeStamp, 'x'), // Convert to moment object
-          calcAsOfDate
-        )
-      : 0;
-  });
-}
-
-function calcTotalInterestForBet(bubblesWagered, interest, betMoment, calcAsOfMoment) {
-  if (!interest || calcAsOfMoment.diff(betMoment) < 0) {
-    return 0;
-  }
-  const interestPerDayValue = interest * 12 / 365; // Sorry astronomical reality, I want Christmas to come a day earlier every 16 years.
-  return Math.round(bubblesWagered * interestPerDayValue * calcAsOfMoment.diff(betMoment, 'days'));
+        bet.bubbles,
+        getPropGroupInterestValue(appState, bet.propGroupId),
+        moment(bet.msTimeStamp, 'x'), // Convert to moment object
+        getInterestCalcAsOfMoment(appState, bet.propGroupId, bet.propId)
+      )
+      : 0
+  );
 }
