@@ -75,7 +75,7 @@ class BetList extends React.Component {
               <div style={rightAlignedCellStyle}>{bet.interestPaid}</div>
               <div style={rightAlignedCellStyle}>
                 {
-                  bet.msTimeStamp === '1488653041267'
+                  bet.msTimeStamp === '1483250400000'
                     ? 'Legacy Bet'
                     : moment(bet.msTimeStamp, 'x').format('YYYY-MM-DD')
                 }
