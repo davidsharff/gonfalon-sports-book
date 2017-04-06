@@ -13,7 +13,6 @@ const {
 
 const {PropTypes} = React;
 
-// TODO: show interest % and returned
 @connect(({app}, {route: {auth}}) => ({
   username: auth.getUsername(),
   bets: app.bets.map((b) =>

@@ -61,7 +61,6 @@ class Client {
           msTimeStamp: moment().format('x')
         })
       });
-
     }
 
     if (isValidAction(action, this.getUserId())) {
