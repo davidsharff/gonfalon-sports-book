@@ -39,6 +39,10 @@ function getUserBubbleBalance(appState, username) {
     : null;
 }
 
+function getPropGroupInterestValue(appState, id) {
+  return  _.find(appState.propGroups, {id}).interest / 100;
+}
+
 module.exports = {
   calcCurrentPropLine,
   getPropGroupLabel,
@@ -77,19 +81,21 @@ function calcProfitForBet(bubbles, effectiveLine) {
   );
 }
 
-// TODO: add timestamp for winning prop records. Otherwise, we'll calc interest forever!
 function calcTotalInterestPayments(appState, username) {
   const now = moment();
-  return _.sumBy(appState.bets, (bet) =>
-    bet.username === username
+  return _.sumBy(appState.bets, (bet) => {
+    const calcAsOfDate = getWinningPropIdForGroup(appState, bet.propGroupId) === bet.propId
+      ? moment(_.find(appState.winningProps, {propId: bet.propId}).msTimeStamp, 'x')
+      : now;
+    return bet.username === username
       ? calcTotalInterestForBet(
           bet.bubbles,
-          _.find(appState.propGroups, {id: bet.propGroupId}).interest / 100,
+          getPropGroupInterestValue(appState, bet.propGroupId),
           moment(bet.msTimeStamp, 'x'), // Convert to moment object
-          now
+          calcAsOfDate
         )
-      : 0
-  );
+      : 0;
+  });
 }
 
 function calcTotalInterestForBet(bubblesWagered, interest, betMoment, calcAsOfMoment) {

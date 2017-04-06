@@ -55,6 +55,13 @@ class Client {
           effectiveLine: calcCurrentPropLine(store.getState().app, payload.propGroupId, payload.propId)
         })
       });
+    } else if (action.type === sharedActionTypes.ADD_WINNING_PROP) {
+      action = Object.assign({}, action, {
+        payload: Object.assign({}, action.payload, {
+          msTimeStamp: moment().format('x')
+        })
+      });
+
     }
 
     if (isValidAction(action, this.getUserId())) {
