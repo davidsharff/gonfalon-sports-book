@@ -21,7 +21,6 @@ describe('selectors', () => {
     const dec15th2016 = moment(DEC_15_2016, MOMENT_FORMAT);
     const bubbles = 100;
     const interest = .1;
-    // Date format: YYYY-MM-DD
     describe(`when a 100 bubble bet was on ${DEC_15_2016} at 10%`, () => {
       describe(`when today is ${JAN_15_2017}`, () => {
         const jan15th2017 = moment(JAN_15_2017, MOMENT_FORMAT);
