@@ -19,7 +19,8 @@ const {PropTypes} = React;
       winningPropId: getWinningPropIdForGroup(app, pg.id),
       includedProps: pg.includedProps.map((prop) =>
         Object.assign({}, prop, {
-          currentLine: calcCurrentPropLine(app, pg.id, prop.id)
+          currentLine: calcCurrentPropLine(app, pg.id, prop.id),
+          lineMovements: _.filter(app.lineMovements, {propId: prop.id}) || []
         })
       )
     })
@@ -130,7 +131,11 @@ class PropGroupWrapper extends React.Component {
       id: PropTypes.number.isRequired,
       description: PropTypes.string.isRequired,
       startingLine: PropTypes.number.isRequired,
-      currentLine: PropTypes.number.isRequired
+      currentLine: PropTypes.number.isRequired,
+      lineMovements: PropTypes.arrayOf(PropTypes.shape({
+        delta: PropTypes.number.isRequired,
+        msTimeStamp: PropTypes.string.isRequired
+      }))
     })).isRequired,
     winningPropId: PropTypes.number,
     onPlaceBet: PropTypes.func.isRequired,

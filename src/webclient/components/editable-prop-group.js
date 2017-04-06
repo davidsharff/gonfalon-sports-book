@@ -125,7 +125,7 @@ class EditablePropGroup extends React.Component {
           </div>
         </div>
         {
-          this.state.includedProps.map(({description, startingLine}, index) =>
+          this.state.includedProps.map(({description, startingLine, currentLine}, index) =>
             <div style={labelAndInputStyle} key={index /* May bite us if we allow deletes*/}>
               <div style={labelStyle}>Prop {index + 1} Description</div>
               <textarea
