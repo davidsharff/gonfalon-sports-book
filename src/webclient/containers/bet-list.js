@@ -2,9 +2,13 @@
 const React = require('react');
 const {connect} = require('react-redux');
 const moment = require('moment');
+const _ = require('lodash');
 const {
   getPropGroupLabel,
-  getPropLabel
+  getPropLabel,
+  calcTotalInterestForBet,
+  getPropGroupInterestValue,
+  getInterestCalcAsOfMoment
 } = require('../../shared/selectors');
 
 const {PropTypes} = React;
@@ -14,7 +18,14 @@ const {PropTypes} = React;
   bets: app.bets.map((b) =>
     Object.assign({}, b, {
       propGroupLabel: getPropGroupLabel(app, b.propGroupId),
-      propLabel: getPropLabel(app, b.propGroupId, b.propId)
+      propLabel: getPropLabel(app, b.propGroupId, b.propId),
+      propGroupInterest: _.find(app.propGroups, {id: b.propGroupId}).interest,
+      interestPaid: calcTotalInterestForBet(
+        b.bubbles,
+        getPropGroupInterestValue(app, b.propGroupId),
+        moment(b.msTimeStamp, 'x'),
+        getInterestCalcAsOfMoment(app, b.propGroupId, b.propId)
+      )
     })
   )
 }))
@@ -44,6 +55,8 @@ class BetList extends React.Component {
           <div style={rightAlignedHeaderStyle}>Prop Group</div>
           <div style={rightAlignedHeaderStyle}>Prop Label</div>
           <div style={rightAlignedHeaderStyle}>Effective Line</div>
+          <div style={rightAlignedHeaderStyle}>Interest</div>
+          <div style={rightAlignedHeaderStyle}>Interest Paid</div>
           <div style={rightAlignedHeaderStyle}>Date</div>
         </div>
         {
@@ -58,6 +71,8 @@ class BetList extends React.Component {
               <div style={rightAlignedCellStyle}>{bet.propGroupLabel}</div>
               <div style={rightAlignedCellStyle}>{bet.propLabel}</div>
               <div style={rightAlignedCellStyle}>{bet.effectiveLine}</div>
+              <div style={rightAlignedCellStyle}>{bet.propGroupInterest}%</div>
+              <div style={rightAlignedCellStyle}>{bet.interestPaid}</div>
               <div style={rightAlignedCellStyle}>
                 {
                   bet.msTimeStamp === '1488653041267'

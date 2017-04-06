@@ -1,5 +1,6 @@
 'use strict';
 const _ = require('lodash');
+const moment = require('moment');
 const {multipleChoiceLabels} = require('./constants');
 
 function calcCurrentPropLine(appState, propGroupId, propId) {
@@ -33,8 +34,27 @@ function getUserBubbleBalance(appState, username) {
   return user
     ? user.startingBubbles -
       calcAllBubblesBetForUser(appState, username) +
-      calcTotalWinningsForUser(appState, username)
+      calcTotalWinningsForUser(appState, username) +
+      calcTotalInterestPayments(appState, username)
     : null;
+}
+
+function getPropGroupInterestValue(appState, id) {
+  return  _.find(appState.propGroups, {id}).interest / 100;
+}
+
+function getInterestCalcAsOfMoment(appState, propGroupId, propId) {
+  return getWinningPropIdForGroup(appState, propGroupId) === propId
+    ? moment(_.find(appState.winningProps, {propId}).msTimeStamp, 'x')
+    : moment();
+}
+
+function calcTotalInterestForBet(bubblesWagered, interest, betMoment, calcAsOfMoment) {
+  if (!interest || calcAsOfMoment.diff(betMoment) < 0) {
+    return 0;
+  }
+  const interestPerDayValue = interest * 12 / 365; // Sorry astronomical reality, I want Christmas to come a day earlier every 16 years.
+  return Math.round(bubblesWagered * interestPerDayValue * calcAsOfMoment.diff(betMoment, 'days'));
 }
 
 module.exports = {
@@ -42,7 +62,10 @@ module.exports = {
   getPropGroupLabel,
   getPropLabel,
   getWinningPropIdForGroup,
-  getUserBubbleBalance
+  getUserBubbleBalance,
+  calcTotalInterestForBet,
+  getPropGroupInterestValue,
+  getInterestCalcAsOfMoment
 };
 
 function calcAllBubblesBetForUser(appState, username) {
@@ -68,5 +91,19 @@ function calcProfitForBet(bubbles, effectiveLine) {
     effectiveLine > 0
       ? bubbles * (effectiveLine / 100)
       : bubbles / (Math.abs(effectiveLine) / 100)
+  );
+}
+
+function calcTotalInterestPayments(appState, username) {
+  return _.sumBy(appState.bets, (bet) =>
+    // TODO: consider adding wrapper to remove burden of getting parameters.
+    bet.username === username
+      ? calcTotalInterestForBet(
+        bet.bubbles,
+        getPropGroupInterestValue(appState, bet.propGroupId),
+        moment(bet.msTimeStamp, 'x'), // Convert to moment object
+        getInterestCalcAsOfMoment(appState, bet.propGroupId, bet.propId)
+      )
+      : 0
   );
 }
