@@ -151,7 +151,7 @@ class IncludedProp extends React.Component {
 
   handleSubmitLineAdjustment() {
     if (this.state.lineAdjustment) {
-      this.props.onAddLineAdjustment(this.props.id, this.state.lineAdjustment);
+      this.props.onAddLineAdjustment(this.props.id, parseInt(this.state.lineAdjustment));
       this.setState({
         lineAdjustment: null
       });
@@ -211,7 +211,7 @@ class IncludedProp extends React.Component {
                     ?  <div style={{display: 'flex', flexDirection: 'column', marginTop: '4px'}}>
                         <input
                           type="number"
-                          value={null}
+                          value={this.state.lineAdjustment}
                           onChange={this.handleChangeLineAdjustment}
                           style={{fontSize: '10pt', marginRight: '4px', width: '167px'}}
                         />
