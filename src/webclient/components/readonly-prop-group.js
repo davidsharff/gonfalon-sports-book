@@ -32,7 +32,8 @@ class ReadonlyPropGroup extends React.Component {
     isAdmin: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
     userBubbleBalance: PropTypes.number,
-    winningPropId: PropTypes.number
+    winningPropId: PropTypes.number,
+    onAddLineAdjustment: PropTypes.func.isRequired // TODO: organize like propTypes together.
   }
 
   handleStartEdit() {
@@ -78,6 +79,7 @@ class ReadonlyPropGroup extends React.Component {
               onAddWinningProp={this.props.onAddWinningProp}
               isAdmin={this.props.isAdmin}
               userBubbleBalance={this.props.userBubbleBalance}
+              onAddLineAdjustment={this.props.onAddLineAdjustment}
             />
           )
         }
@@ -104,12 +106,14 @@ class IncludedProp extends React.Component {
     isLoggedIn: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
     isAdmin: PropTypes.bool.isRequired,
-    userBubbleBalance: PropTypes.number
+    userBubbleBalance: PropTypes.number,
+    onAddLineAdjustment: PropTypes.func.isRequired
   }
 
   state = {
     isInputtingBet: false,
-    isViewingLineMovement: false
+    isViewingLineMovement: false,
+    lineAdjustment: null
   }
 
   handleToggleBetInput() {
@@ -137,6 +141,12 @@ class IncludedProp extends React.Component {
         isViewingLineMovement: !this.state.isViewingLineMovement
       });
     }
+  }
+
+  handleChangeLineAdjustment(e) {
+    this.setState({
+      lineAdjustment: e.target.value
+    });
   }
 
   render() {
@@ -186,6 +196,24 @@ class IncludedProp extends React.Component {
                       <div style={lineTimeStampStyle}>{moment(msTimeStamp, 'x').format('M-D-YYYY')}</div>
                     </div>
                   )
+                }
+                {
+                  props.isAdmin
+                    ?  <div style={{display: 'flex', flexDirection: 'column', marginTop: '4px'}}>
+                        <input
+                          type="number"
+                          value={null}
+                          onChange={this.handleChangeLineAdjustment}
+                          style={{fontSize: '10pt', marginRight: '4px', width: '167px'}}
+                        />
+                        <button
+                          style={{paddingTop: '2px', width: '170px'}}
+                          onClick={() => props.onAddLineAdjustment(props.id, this.state.lineAdjustment)}
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    : null
                 }
               </div>
             : null
@@ -287,7 +315,7 @@ const expandableLineStyle = Object.assign({}, propItemStyle, {
 const lineMovementContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
-  marginLeft: '33px',
+  marginLeft: '15px',
   marginTop: '5px'
 };
 

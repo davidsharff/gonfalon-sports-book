@@ -33,7 +33,13 @@ class PropBetInput extends React.Component {
     return (
       <div style={containerStyle}>
         <div style={rowContainerStyle}>
-          <input type="number" onChange={this.handleBubbleInput} placeholder="bubbles" value={state.bubbleInputValue} />
+          <input
+            type="number"
+            onChange={this.handleBubbleInput}
+            placeholder="bubbles"
+            value={state.bubbleInputValue}
+            style={{width: '167px'}}
+          />
           <div style={balanceLabelStyle}>Balance: {this.props.currentBubbleBalance} bubbles</div>
         </div>
         <div style={{display: 'flex', flexDirection: 'row'}}>

@@ -76,6 +76,10 @@ class PropList extends React.Component {
     });
   }
 
+  handleAddLineAdjustment(propGroupId, propId, delta) {
+    console.log(propGroupId, propId, delta);
+  }
+
   render() {
     return (
       <div style={containerStyle}>
@@ -102,6 +106,7 @@ class PropList extends React.Component {
               isLoggedIn={this.props.isLoggedIn}
               onAddWinningProp={this.handleAddWinningProp}
               userBubbleBalance={this.props.userBubbleBalance}
+              onAddLineAdjustment={this.handleAddLineAdjustment}
             />
           )
         }
@@ -141,7 +146,8 @@ class PropGroupWrapper extends React.Component {
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
-    userBubbleBalance: PropTypes.number
+    userBubbleBalance: PropTypes.number,
+    onAddLineAdjustment: PropTypes.func.isRequired
   }
 
   state = {
@@ -164,8 +170,14 @@ class PropGroupWrapper extends React.Component {
     this.handleToggleEditing();
   }
 
+  // TODO: nuke in favor of passing propGroupId to IncludedProp.
   handleAddWinningProp(propId) {
     this.props.onAddWinningProp(this.props.id, propId);
+  }
+
+  // TODO: nuke in favor of passing propGroupId to IncludedProp.
+  handleAddLineAdjustment(propId, delta) {
+    this.props.onAddLineAdjustment(this.props.id, propId, delta);
   }
 
   render() {
@@ -196,6 +208,7 @@ class PropGroupWrapper extends React.Component {
                 onAddWinningProp={this.handleAddWinningProp}
                 winningPropId={props.winningPropId}
                 userBubbleBalance={props.userBubbleBalance}
+                onAddLineAdjustment={this.handleAddLineAdjustment}
               />
         }
       </div>
