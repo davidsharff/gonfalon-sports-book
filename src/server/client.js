@@ -61,6 +61,12 @@ class Client {
           msTimeStamp: moment().format('x')
         })
       });
+    } else if (action.type === sharedActionTypes.ADD_LINE_ADJUSTMENT) {
+      action = Object.assign({}, action, { // TODO: move to helper function?
+        payload: Object.assign({}, action.payload, {
+          msTimeStamp: moment().format('x')
+        })
+      });
     }
 
     if (isValidAction(action, this.getUserId())) {

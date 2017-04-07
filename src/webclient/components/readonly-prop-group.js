@@ -22,7 +22,7 @@ class ReadonlyPropGroup extends React.Component {
       description: PropTypes.string.isRequired,
       startingLine: PropTypes.number.isRequired,
       currentLine: PropTypes.number.isRequired,
-      lineMovements: PropTypes.arrayOf(PropTypes.shape({
+      lineAdjustments: PropTypes.arrayOf(PropTypes.shape({
         delta: PropTypes.number.isRequired,
         msTimeStamp: PropTypes.string.isRequired
       }))
@@ -61,7 +61,7 @@ class ReadonlyPropGroup extends React.Component {
         <div style={operatorStyle}>{this.props.operator}</div>
         <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         {
-          this.props.includedProps.map(({id: propId, description, currentLine, startingLine, lineMovements}, index) =>
+          this.props.includedProps.map(({id: propId, description, currentLine, startingLine, lineAdjustments}, index) =>
             <IncludedProp
               key={propId}
               id={propId}
@@ -70,7 +70,7 @@ class ReadonlyPropGroup extends React.Component {
               hasWinningProp={!!this.props.winningPropId}
               currentLine={currentLine}
               startingLine={startingLine}
-              lineMovements={lineMovements}
+              lineAdjustments={lineAdjustments}
               choiceLabel={multipleChoiceLabels[index]}
               isLoggedIn={this.props.isLoggedIn}
               onPlaceBet={(bubbles) =>
@@ -97,7 +97,7 @@ class IncludedProp extends React.Component {
     hasWinningProp: PropTypes.bool.isRequired,
     currentLine: PropTypes.number.isRequired,
     startingLine: PropTypes.number.isRequired,
-    lineMovements: PropTypes.arrayOf(PropTypes.shape({
+    lineAdjustments: PropTypes.arrayOf(PropTypes.shape({
       delta: PropTypes.number.isRequired,
       msTimeStamp: PropTypes.string.isRequired
     })),
@@ -136,7 +136,7 @@ class IncludedProp extends React.Component {
 
   handleToggleViewLineMovement() {
     // TODO: consolidate this and similiar checks into methods
-    if (this.props.isAdmin || this.props.lineMovements.length) {
+    if (this.props.isAdmin || this.props.lineAdjustments.length) {
       this.setState({
         isViewingLineMovement: !this.state.isViewingLineMovement
       });
@@ -147,6 +147,15 @@ class IncludedProp extends React.Component {
     this.setState({
       lineAdjustment: e.target.value
     });
+  }
+
+  handleSubmitLineAdjustment() {
+    if (this.state.lineAdjustment) {
+      this.props.onAddLineAdjustment(this.props.id, this.state.lineAdjustment);
+      this.setState({
+        lineAdjustment: null
+      });
+    }
   }
 
   render() {
@@ -168,7 +177,7 @@ class IncludedProp extends React.Component {
               <div style={propItemStyle}>{props.description}</div>
             </div>
             <div
-              style={props.isAdmin || props.lineMovements.length ? expandableLineStyle : propItemStyle}
+              style={props.isAdmin || props.lineAdjustments.length ? expandableLineStyle : propItemStyle}
               onClick={this.handleToggleViewLineMovement}
             >
               {(props.currentLine > 0 ? '+' : '') + props.currentLine}
@@ -186,7 +195,7 @@ class IncludedProp extends React.Component {
                   <div style={lineTimeStampStyle}>Date</div>
                 </div>
                 {
-                  props.lineMovements.map(({delta, msTimeStamp}) =>
+                  props.lineAdjustments.map(({delta, msTimeStamp}) =>
                     <div style={lineMovementRowStyle} key={msTimeStamp}>
                       <div style={lineDeltaStyle}>
                         {
@@ -208,7 +217,8 @@ class IncludedProp extends React.Component {
                         />
                         <button
                           style={{paddingTop: '2px', width: '170px'}}
-                          onClick={() => props.onAddLineAdjustment(props.id, this.state.lineAdjustment)}
+                          onClick={this.handleSubmitLineAdjustment}
+                          disabled={!this.state.lineAdjustment}
                         >
                           Submit
                         </button>
