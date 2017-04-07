@@ -170,14 +170,17 @@ class IncludedProp extends React.Component {
     // TODO: it is horrible that the prop rows grow the width of the screen (and are clickable)
     return (
       <div style={propContainerStyle}>
-        <div style={flexRowStyle}>
-          <div style={props.isLoggedIn && !props.hasWinningProp ? enabledPropRowStyle : disabledPropRowStyle}>
-            <div style={flexRowStyle} onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}>
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+          <div style={propRowStyle}>
+            <div
+              style={props.isLoggedIn && !props.hasWinningProp ? enabledChoiceAndDescStyle : choiceAndDescRowStyle}
+              onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
+            >
               <div style={propItemStyle}>{props.choiceLabel}</div>
               <div style={propItemStyle}>{props.description}</div>
             </div>
             <div
-              style={props.isAdmin || props.lineAdjustments.length ? expandableLineStyle : propItemStyle}
+              style={props.isAdmin || props.lineAdjustments.length ? expandableLineStyle : lineStyle}
               onClick={this.handleToggleViewLineMovement}
             >
               {(props.currentLine > 0 ? '+' : '') + props.currentLine}
@@ -190,7 +193,7 @@ class IncludedProp extends React.Component {
                 <div style={{marginBottom: '4px'}}>
                   Opening line: {(props.startingLine > 0 ? '+' : '') + props.startingLine}
                 </div>
-                <div style={flexRowStyle}>
+                <div style={{display: 'flex', flexDirection: 'row'}}>
                   <div style={lineDeltaStyle}>Change</div>
                   <div style={lineTimeStampStyle}>Date</div>
                 </div>
@@ -253,11 +256,6 @@ class IncludedProp extends React.Component {
 
 const topSpacing = '10px';
 
-const flexRowStyle = {
-  display: 'flex',
-  flexDirection: 'row'
-};
-
 const propGroupContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
@@ -269,16 +267,20 @@ const groupLabelStyle = {
   paddingBotton: '5px'
 };
 
-const enabledPropRowStyle = {
+const propRowStyle = {
   display: 'flex',
   flexDirection: 'row',
   paddingTop: topSpacing,
-  paddingLeft: '15px',
-  cursor: 'pointer'
+  paddingLeft: '15px'
 };
 
-const disabledPropRowStyle = Object.assign({}, enabledPropRowStyle, {
-  cursor: 'default'
+const choiceAndDescRowStyle = {
+  display: 'flex',
+  flexDirection: 'row'
+};
+
+const enabledChoiceAndDescStyle = Object.assign({}, choiceAndDescRowStyle, {
+  cursor: 'pointer'
 });
 
 const propItemStyle = {
@@ -320,6 +322,10 @@ const pencilIconStyle = {
 const expandableLineStyle = Object.assign({}, propItemStyle, {
   textDecoration: 'underline',
   cursor: 'pointer'
+});
+
+const lineStyle = Object.assign({}, propItemStyle, {
+  cursor: 'default'
 });
 
 const lineMovementContainerStyle = {
