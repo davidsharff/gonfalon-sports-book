@@ -17,37 +17,45 @@ class AuthService {
 
   _doAuthentication(authResult) {
     const that = this;
-    this.setToken(authResult.idToken);
-
-    localStorage.setItem('access_token', authResult.accessToken);
-
-    this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
+    this.lock.getUserInfo(authResult.accessToken, function(error, profile) {
       if (error) {
         console.error(error);
+        window.alert(
+          'Could not complete login.\n' +
+          'Please contact @davidsharff on Twitter if it continues to fail.\n' +
+          'Sorry about the ugly popup.'
+        );
         return;
       }
+      localStorage.setItem('id_token', authResult.idToken);
+      localStorage.setItem('access_token', authResult.accessToken);
       localStorage.setItem('username', that._getUsernameForProfile(profile));
+      that.sendServerAuthDetails(profile);
     });
-    this.sendServerAuthDetails(); // TODO: clean this up to avoid second call to auth0
-
     // TODO: this isn't serving it's purpose. We are still blowing up for unallowed login callback urls.
     store.dispatch(routeActions.replace({pathName: '/'}));
   }
 
-  sendServerAuthDetails() {
+  sendServerAuthDetails(profile) {
+    socket.sendAction({
+      type: NOTIFY_AUTHENTICATION,
+      payload: {
+        userId: profile.user_id,
+        username: this._getUsernameForProfile(profile)
+      }
+    });
+  }
+
+  reauthenticate() {
     const that = this;
     this.lock.getUserInfo(localStorage.getItem('access_token'), function(error, profile) {
       if (error) {
         console.error(error);
+        that.logout();
+        that.login();
         return;
       }
-      socket.sendAction({
-        type: NOTIFY_AUTHENTICATION,
-        payload: {
-          userId: profile.user_id,
-          username: that._getUsernameForProfile(profile)
-        }
-      });
+      that.sendServerAuthDetails(profile);
     });
   }
 
@@ -69,10 +77,6 @@ class AuthService {
 
   loggedIn() {
     return !!this.getToken();
-  }
-
-  setToken(idToken) {
-    localStorage.setItem('id_token', idToken);
   }
 
   getToken() {
