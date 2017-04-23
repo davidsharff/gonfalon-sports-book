@@ -52,6 +52,14 @@ function parseArgs() {
     }
   );
 
+  argParser.addArgument(
+    ['-us', '--updateSchema'],
+    {
+      help: 'Run in production mode',
+      action: 'storeTrue'
+    }
+  );
+
   const args = argParser.parseArgs();
 
   process.env.NODE_ENV = args.production ? 'production' : 'development';
@@ -60,6 +68,7 @@ function parseArgs() {
     port: parseInt(args.port),
     isDevEnv: args.development || args.production
       ? args.development
-      : (NODE_ENV ? NODE_ENV === 'development' : true)
+      : (NODE_ENV ? NODE_ENV === 'development' : true),
+    updateSchema: args.updateSchema
   };
 }

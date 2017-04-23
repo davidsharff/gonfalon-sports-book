@@ -4,6 +4,8 @@ const path = require('path');
 const {createStore} = require('redux');
 const appStateReducer = require('./reducers/app-state-reducer');
 const localStateReducer = require('./reducers/local-state-reducer');
+const {getArgs} = require('./args');
+const updateSchema = require('./update-schema');
 
 const store = createStore(createReducer, getInitialState());
 
@@ -38,7 +40,11 @@ function getInitialState() {
       throw e;
     }
   }
-  return savedState
+  const ret = savedState
     ? JSON.parse(savedState)
     : initialState;
+
+  return getArgs().updateSchema
+    ? updateSchema(ret)
+    : ret;
 }
