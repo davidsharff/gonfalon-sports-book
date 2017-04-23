@@ -24,12 +24,14 @@ function getInitialState() {
       authUsers: []
     },
     app: {
-      users: [],
-      propGroups: [],
       bets: [],
+      users: [],
+      prizes: [],
+      propGroups: [],
       winningProps: [],
       prizes: [],
-      lineAdjustments: []
+      lineAdjustments: [],
+      buyBacks: []
     }
   };
   let savedState;

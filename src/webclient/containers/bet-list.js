@@ -3,6 +3,8 @@ const React = require('react');
 const {connect} = require('react-redux');
 const moment = require('moment');
 const _ = require('lodash');
+const autobind = require('autobind-decorator');
+const socket = require('../socket');
 const {
   getPropGroupLabel,
   getPropLabel,
@@ -10,6 +12,7 @@ const {
   getPropGroupInterestValue,
   getInterestCalcAsOfMoment
 } = require('../../shared/selectors');
+const {BUY_BACK_BET} = require('../../shared/action-types');
 
 const {PropTypes} = React;
 
@@ -21,6 +24,7 @@ const {PropTypes} = React;
       propGroupLabel: getPropGroupLabel(app, b.propGroupId),
       propLabel: getPropLabel(app, b.propGroupId, b.propId),
       propGroupInterest: _.find(app.propGroups, {id: b.propGroupId}).interest,
+      hasBuyBack: !!_.find(app.buyBacks, {betId: b.id}),
       interestPaid: calcTotalInterestForBet(
         b.bubbles,
         getPropGroupInterestValue(app, b.propGroupId),
@@ -30,7 +34,7 @@ const {PropTypes} = React;
     })
   )
 }))
-
+@autobind
 class BetList extends React.Component {
   static propTypes = {
     username: PropTypes.string,
@@ -47,6 +51,15 @@ class BetList extends React.Component {
     }))
   }
 
+  handleBuyBack(id) {
+    socket.sendAction({
+      type: BUY_BACK_BET,
+      payload: {
+        betId: id
+      }
+    });
+  }
+
   render() {
     // TODO: settle on moment format for display and move to constants.
     return (
@@ -61,7 +74,11 @@ class BetList extends React.Component {
           <div style={rightAlignedHeaderStyle}>Interest Paid</div>
           <div style={rightAlignedHeaderStyle}>Current Value</div>
           <div style={dateHeaderStyle}>Date</div>
-          <div style={sellHeaderStyle}>Sell?</div>
+          {
+            this.props.hasBets
+              ? <div style={sellHeaderStyle}>Sell?</div>
+              : null
+          }
         </div>
         {
           this.props.bets.map((bet, i) =>
@@ -87,13 +104,22 @@ class BetList extends React.Component {
                     : moment(bet.msTimeStamp, 'x').format('M-D-YY')
                 }
               </div>
-              <div style={sellCellStyle}>
-                {
-                  bet.username === this.props.username
-                    ? <button style={{marginRight: '4px'}}>Sell</button>
-                    : null
-                }
-              </div>
+              {
+                console.log(bet.hasBuyBack) || this.props.hasBets // TODO: I hate this nesting.
+                  ? <div style={sellCellStyle}>
+                    {
+                      bet.username === this.props.username
+                        ? bet.hasBuyBack
+                            ? <div style={soldTextStyle}>Sold</div>
+                            : <button onClick={() => this.handleBuyBack(bet.id)} style={{marginRight: '4px'}}>
+                                Sell
+                              </button>
+                        : null
+                    }
+                    </div>
+                  : null
+              }
+
             </div>
           )
         }
@@ -112,6 +138,7 @@ const containerStyle = {
 const rowStyle = {
   display: 'flex',
   flexDirection: 'row',
+  alignItems: 'center',
   paddingTop: '5px',
   paddingBottom: '5px',
   minWidth: '850px'
@@ -160,5 +187,10 @@ const sellCellStyle = Object.assign({}, rightAlignedCellStyle, {
   maxWidth: '90px',
   textAlign: 'right'
 });
+
+const soldTextStyle = {
+  marginRight: '4px',
+  fontStyle: 'italic'
+};
 
 module.exports = BetList;

@@ -46,6 +46,14 @@ function appReducer(app, action) {
         ]
       });
     }
+    case sharedActionTypes.BUY_BACK_BET: {
+      return Object.assign({}, app, {
+        buyBacks: [
+          payload,
+          ...app.buyBacks
+        ]
+      });
+    }
     case serverActionTypes.ADD_NEW_USER: {
       return Object.assign({}, app, {
         users: [...app.users, payload]
