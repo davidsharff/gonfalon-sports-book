@@ -15,6 +15,7 @@ const {PropTypes} = React;
 
 @connect(({app}, {route: {auth}}) => ({
   username: auth.getUsername(),
+  hasBets: app.bets.reduce((hasBet, b) => hasBet || b.username === auth.getUsername(), false),
   bets: app.bets.map((b) =>
     Object.assign({}, b, {
       propGroupLabel: getPropGroupLabel(app, b.propGroupId),
@@ -33,6 +34,7 @@ const {PropTypes} = React;
 class BetList extends React.Component {
   static propTypes = {
     username: PropTypes.string,
+    hasBets: PropTypes.bool.isRequired,
     bets: PropTypes.arrayOf(PropTypes.shape({
       bubbles: PropTypes.number.isRequired,
       propId: PropTypes.number.isRequired,
@@ -57,7 +59,9 @@ class BetList extends React.Component {
           <div style={rightAlignedHeaderStyle}>Effective Line</div>
           <div style={rightAlignedHeaderStyle}>Interest %</div>
           <div style={rightAlignedHeaderStyle}>Interest Paid</div>
-          <div style={rightAlignedHeaderStyle}>Date</div>
+          <div style={rightAlignedHeaderStyle}>Current Value</div>
+          <div style={dateHeaderStyle}>Date</div>
+          <div style={sellHeaderStyle}>Sell?</div>
         </div>
         {
           this.props.bets.map((bet, i) =>
@@ -74,12 +78,22 @@ class BetList extends React.Component {
               <div style={rightAlignedCellStyle}>{bet.propGroupInterest}%</div>
               <div style={rightAlignedCellStyle}>{bet.interestPaid}</div>
               <div style={rightAlignedCellStyle}>
+                {bet.bubbles}
+              </div>
+              <div style={dateCellStyle}>
                 {
                   bet.msTimeStamp === '1483250400000'
                     ? 'Legacy Bet'
                     : moment(bet.msTimeStamp, 'x').format('M-D-YY')
                 }
-                </div>
+              </div>
+              <div style={sellCellStyle}>
+                {
+                  bet.username === this.props.username
+                    ? <button style={{marginRight: '4px'}}>Sell</button>
+                    : null
+                }
+              </div>
             </div>
           )
         }
@@ -128,5 +142,23 @@ const headerCellStyle = Object.assign({}, cellStyle, {
 });
 
 const rightAlignedHeaderStyle = Object.assign({}, headerCellStyle, rightAlignedCellStyle);
+
+const dateHeaderStyle = Object.assign({}, rightAlignedHeaderStyle, {
+  flex: '.25'
+});
+
+const dateCellStyle = Object.assign({}, rightAlignedCellStyle, {
+  flex: '.25'
+});
+
+const sellHeaderStyle = Object.assign({}, rightAlignedHeaderStyle, {
+  maxWidth: '90px',
+  textAlign: 'right'
+});
+
+const sellCellStyle = Object.assign({}, rightAlignedCellStyle, {
+  maxWidth: '90px',
+  textAlign: 'right'
+});
 
 module.exports = BetList;
