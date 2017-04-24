@@ -94,8 +94,13 @@ class BetList extends React.Component {
               <div style={rightAlignedCellStyle}>{bet.effectiveLine}</div>
               <div style={rightAlignedCellStyle}>{bet.propGroupInterest}%</div>
               <div style={rightAlignedCellStyle}>{bet.interestPaid}</div>
+
               <div style={rightAlignedCellStyle}>
-                {bet.bubbles}
+                {
+                  bet.hasBuyBack
+                    ? 'N/A'
+                    : 999 // TODO: replace placeholder with actual current value
+                }
               </div>
               <div style={dateCellStyle}>
                 {
