@@ -38,6 +38,14 @@ function appReducer(app, action) {
         ]
       });
     }
+    case sharedActionTypes.ADD_LINE_ADJUSTMENT: {
+      return Object.assign({}, app, {
+        lineAdjustments: [
+          ...app.lineAdjustments,
+          payload
+        ]
+      });
+    }
     case serverActionTypes.ADD_NEW_USER: {
       return Object.assign({}, app, {
         users: [...app.users, payload]

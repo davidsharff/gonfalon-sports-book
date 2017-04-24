@@ -51,12 +51,17 @@ class Client {
         payload: Object.assign({}, payload, {
           username: getUsernameForUserId(store.getState(), this.getUserId()),
           msTimeStamp: moment().format('x'),
-          // TODO: got to be a better way of doing this. Balk and notify user if the line changed since submission?
           effectiveLine: calcCurrentPropLine(store.getState().app, payload.propGroupId, payload.propId)
         })
       });
     } else if (action.type === sharedActionTypes.ADD_WINNING_PROP) {
       action = Object.assign({}, action, {
+        payload: Object.assign({}, action.payload, {
+          msTimeStamp: moment().format('x')
+        })
+      });
+    } else if (action.type === sharedActionTypes.ADD_LINE_ADJUSTMENT) {
+      action = Object.assign({}, action, { // TODO: move to helper function?
         payload: Object.assign({}, action.payload, {
           msTimeStamp: moment().format('x')
         })

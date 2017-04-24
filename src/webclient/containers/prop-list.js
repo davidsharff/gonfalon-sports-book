@@ -8,9 +8,16 @@ const AdminPropGroupControls = require('../components/admin-prop-group-controls'
 const ReadonlyPropGroup = require('../components/readonly-prop-group');
 const EditablePropGroup = require('../components/editable-prop-group');
 const {calcCurrentPropLine, getWinningPropIdForGroup, getUserBubbleBalance} = require('../../shared/selectors');
-const {ADD_NEW_PROP_GROUP, EDIT_PROP_GROUP, PLACE_BET, ADD_WINNING_PROP} = require('../../shared/action-types');
 const utils = require('../../shared/utils');
 const {adminUsernames, propGroupOperators} = require('../../shared/constants');
+
+const {
+  ADD_NEW_PROP_GROUP,
+  EDIT_PROP_GROUP,
+  PLACE_BET,
+  ADD_WINNING_PROP,
+  ADD_LINE_ADJUSTMENT
+} = require('../../shared/action-types');
 
 const {PropTypes} = React;
 @connect(({app}, {route: {auth}}) => ({
@@ -19,7 +26,8 @@ const {PropTypes} = React;
       winningPropId: getWinningPropIdForGroup(app, pg.id),
       includedProps: pg.includedProps.map((prop) =>
         Object.assign({}, prop, {
-          currentLine: calcCurrentPropLine(app, pg.id, prop.id)
+          currentLine: calcCurrentPropLine(app, pg.id, prop.id),
+          lineAdjustments: _.filter(app.lineAdjustments, {propId: prop.id}) || []
         })
       )
     })
@@ -75,6 +83,16 @@ class PropList extends React.Component {
     });
   }
 
+  handleAddLineAdjustment(propId, delta) {
+    socket.sendAction({
+      type: ADD_LINE_ADJUSTMENT,
+      payload: {
+        propId,
+        delta
+      }
+    });
+  }
+
   render() {
     return (
       <div style={containerStyle}>
@@ -101,6 +119,7 @@ class PropList extends React.Component {
               isLoggedIn={this.props.isLoggedIn}
               onAddWinningProp={this.handleAddWinningProp}
               userBubbleBalance={this.props.userBubbleBalance}
+              onAddLineAdjustment={this.handleAddLineAdjustment}
             />
           )
         }
@@ -130,13 +149,18 @@ class PropGroupWrapper extends React.Component {
       id: PropTypes.number.isRequired,
       description: PropTypes.string.isRequired,
       startingLine: PropTypes.number.isRequired,
-      currentLine: PropTypes.number.isRequired
+      currentLine: PropTypes.number.isRequired,
+      lineAdjustments: PropTypes.arrayOf(PropTypes.shape({
+        delta: PropTypes.number.isRequired,
+        msTimeStamp: PropTypes.string.isRequired
+      }))
     })).isRequired,
     winningPropId: PropTypes.number,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
-    userBubbleBalance: PropTypes.number
+    userBubbleBalance: PropTypes.number,
+    onAddLineAdjustment: PropTypes.func.isRequired
   }
 
   state = {
@@ -159,6 +183,7 @@ class PropGroupWrapper extends React.Component {
     this.handleToggleEditing();
   }
 
+  // TODO: nuke in favor of passing propGroupId to IncludedProp.
   handleAddWinningProp(propId) {
     this.props.onAddWinningProp(this.props.id, propId);
   }
@@ -191,6 +216,7 @@ class PropGroupWrapper extends React.Component {
                 onAddWinningProp={this.handleAddWinningProp}
                 winningPropId={props.winningPropId}
                 userBubbleBalance={props.userBubbleBalance}
+                onAddLineAdjustment={props.onAddLineAdjustment}
               />
         }
       </div>

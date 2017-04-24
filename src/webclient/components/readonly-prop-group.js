@@ -2,11 +2,13 @@
 const React = require('react');
 const _ = require('lodash');
 const autobind = require('autobind-decorator');
+const moment = require('moment');
 const PropBetInput = require('../components/prop-bet-input');
 const {propGroupOperators, multipleChoiceLabels} = require('../../shared/constants');
 
 const {PropTypes} = React;
 
+// TODO: "ReadOnly" no longer a good name
 @autobind
 class ReadonlyPropGroup extends React.Component {
   static propTypes = {
@@ -19,14 +21,19 @@ class ReadonlyPropGroup extends React.Component {
       id: PropTypes.number.isRequired,
       description: PropTypes.string.isRequired,
       startingLine: PropTypes.number.isRequired,
-      currentLine: PropTypes.number.isRequired
+      currentLine: PropTypes.number.isRequired,
+      lineAdjustments: PropTypes.arrayOf(PropTypes.shape({
+        delta: PropTypes.number.isRequired,
+        msTimeStamp: PropTypes.string.isRequired
+      }))
     })).isRequired,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     isAdmin: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
     userBubbleBalance: PropTypes.number,
-    winningPropId: PropTypes.number
+    winningPropId: PropTypes.number,
+    onAddLineAdjustment: PropTypes.func.isRequired // TODO: organize like propTypes together.
   }
 
   handleStartEdit() {
@@ -54,14 +61,16 @@ class ReadonlyPropGroup extends React.Component {
         <div style={operatorStyle}>{this.props.operator}</div>
         <div style={interestStyle}>{formatInterestValue(this.props.interest)}</div>
         {
-          this.props.includedProps.map(({id: propId, description, currentLine}, index) =>
+          this.props.includedProps.map(({id: propId, description, currentLine, startingLine, lineAdjustments}, index) =>
             <IncludedProp
               key={propId}
               id={propId}
               description={description}
               isWinningProp={this.props.winningPropId === propId}
               hasWinningProp={!!this.props.winningPropId}
-              line={currentLine}
+              currentLine={currentLine}
+              startingLine={startingLine}
+              lineAdjustments={lineAdjustments}
               choiceLabel={multipleChoiceLabels[index]}
               isLoggedIn={this.props.isLoggedIn}
               onPlaceBet={(bubbles) =>
@@ -70,6 +79,7 @@ class ReadonlyPropGroup extends React.Component {
               onAddWinningProp={this.props.onAddWinningProp}
               isAdmin={this.props.isAdmin}
               userBubbleBalance={this.props.userBubbleBalance}
+              onAddLineAdjustment={this.props.onAddLineAdjustment}
             />
           )
         }
@@ -85,17 +95,25 @@ class IncludedProp extends React.Component {
     description: PropTypes.string.isRequired,
     isWinningProp: PropTypes.bool.isRequired,
     hasWinningProp: PropTypes.bool.isRequired,
-    line: PropTypes.number.isRequired,
+    currentLine: PropTypes.number.isRequired,
+    startingLine: PropTypes.number.isRequired,
+    lineAdjustments: PropTypes.arrayOf(PropTypes.shape({
+      delta: PropTypes.number.isRequired,
+      msTimeStamp: PropTypes.string.isRequired
+    })),
     choiceLabel: PropTypes.string.isRequired,
     onPlaceBet: PropTypes.func.isRequired,
     isLoggedIn: PropTypes.bool.isRequired,
     onAddWinningProp: PropTypes.func.isRequired,
     isAdmin: PropTypes.bool.isRequired,
-    userBubbleBalance: PropTypes.number
+    userBubbleBalance: PropTypes.number,
+    onAddLineAdjustment: PropTypes.func.isRequired
   }
 
   state = {
-    isInputtingBet: false
+    isInputtingBet: false,
+    isViewingLineMovement: false,
+    lineAdjustment: null
   }
 
   handleToggleBetInput() {
@@ -111,9 +129,33 @@ class IncludedProp extends React.Component {
     this.handleToggleBetInput();
   }
 
-  handleMarkAsWon(propId) {
+  handleMarkAsWon(propId) { // TODO: why not read param from props?
     this.handleToggleBetInput();
     this.props.onAddWinningProp(propId);
+  }
+
+  handleToggleViewLineMovement() {
+    // TODO: consolidate this and similiar checks into methods
+    if (this.props.isAdmin || this.props.lineAdjustments.length) {
+      this.setState({
+        isViewingLineMovement: !this.state.isViewingLineMovement
+      });
+    }
+  }
+
+  handleChangeLineAdjustment(e) {
+    this.setState({
+      lineAdjustment: e.target.value
+    });
+  }
+
+  handleSubmitLineAdjustment() {
+    if (this.state.lineAdjustment) {
+      this.props.onAddLineAdjustment(this.props.id, parseInt(this.state.lineAdjustment));
+      this.setState({
+        lineAdjustment: null
+      });
+    }
   }
 
   render() {
@@ -128,16 +170,67 @@ class IncludedProp extends React.Component {
     // TODO: it is horrible that the prop rows grow the width of the screen (and are clickable)
     return (
       <div style={propContainerStyle}>
-        <div style={props.isLoggedIn && !props.hasWinningProp ? enabledPropRowStyle : disabledPropRowStyle}>
-          <div
-            style={{display: 'flex', flexDirection: 'row'}}
-            onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
-          >
-            <div style={propItemStyle}>{props.choiceLabel}</div>
-            <div style={propItemStyle}>{props.description}</div>
-            <div style={propItemStyle}>{(props.line > 0 ? '+' : '') + props.line}</div>
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+          <div style={propRowStyle}>
+            <div
+              style={props.isLoggedIn && !props.hasWinningProp ? enabledChoiceAndDescStyle : choiceAndDescRowStyle}
+              onClick={() => props.isLoggedIn && this.handleToggleBetInput(props.id)}
+            >
+              <div style={propItemStyle}>{props.choiceLabel}</div>
+              <div style={propItemStyle}>{props.description}</div>
+            </div>
+            <div
+              style={props.isAdmin || props.lineAdjustments.length ? expandableLineStyle : lineStyle}
+              onClick={this.handleToggleViewLineMovement}
+            >
+              {(props.currentLine > 0 ? '+' : '') + props.currentLine}
+            </div>
           </div>
         </div>
+        {
+          this.state.isViewingLineMovement
+            ? <div style={lineMovementContainerStyle}>
+                <div style={{marginBottom: '4px'}}>
+                  Opening line: {(props.startingLine > 0 ? '+' : '') + props.startingLine}
+                </div>
+                <div style={{display: 'flex', flexDirection: 'row'}}>
+                  <div style={lineDeltaStyle}>Change</div>
+                  <div style={lineTimeStampStyle}>Date</div>
+                </div>
+                {
+                  props.lineAdjustments.map(({delta, msTimeStamp}) =>
+                    <div style={lineMovementRowStyle} key={msTimeStamp}>
+                      <div style={lineDeltaStyle}>
+                        {
+                          (delta > 0 ? '+' : '') + delta
+                        }
+                      </div>
+                      <div style={lineTimeStampStyle}>{moment(msTimeStamp, 'x').format('M-D-YYYY')}</div>
+                    </div>
+                  )
+                }
+                {
+                  props.isAdmin
+                    ?  <div style={{display: 'flex', flexDirection: 'column', marginTop: '4px'}}>
+                        <input
+                          type="number"
+                          value={this.state.lineAdjustment}
+                          onChange={this.handleChangeLineAdjustment}
+                          style={{fontSize: '10pt', marginRight: '4px', width: '167px'}}
+                        />
+                        <button
+                          style={{paddingTop: '2px', width: '170px'}}
+                          onClick={this.handleSubmitLineAdjustment}
+                          disabled={!this.state.lineAdjustment}
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    : null
+                }
+              </div>
+            : null
+        }
         {
           this.state.isInputtingBet
             ? <PropBetInput
@@ -174,16 +267,20 @@ const groupLabelStyle = {
   paddingBotton: '5px'
 };
 
-const enabledPropRowStyle = {
+const propRowStyle = {
   display: 'flex',
   flexDirection: 'row',
   paddingTop: topSpacing,
-  paddingLeft: '15px',
-  cursor: 'pointer'
+  paddingLeft: '15px'
 };
 
-const disabledPropRowStyle = Object.assign({}, enabledPropRowStyle, {
-  cursor: 'default'
+const choiceAndDescRowStyle = {
+  display: 'flex',
+  flexDirection: 'row'
+};
+
+const enabledChoiceAndDescStyle = Object.assign({}, choiceAndDescRowStyle, {
+  cursor: 'pointer'
 });
 
 const propItemStyle = {
@@ -221,6 +318,42 @@ const losingPropContainerStyle = Object.assign({}, basePropContainerStyle, {
 const pencilIconStyle = {
   paddingLeft: '15px'
 };
+
+const expandableLineStyle = Object.assign({}, propItemStyle, {
+  textDecoration: 'underline',
+  cursor: 'pointer'
+});
+
+const lineStyle = Object.assign({}, propItemStyle, {
+  cursor: 'default'
+});
+
+const lineMovementContainerStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  marginLeft: '15px',
+  marginTop: '5px'
+};
+
+const lineMovementRowStyle = {
+  display: 'flex',
+  flexDirection: 'row'
+};
+
+const lineMovementItemStyle = {
+  padding: '4px 2px 0 2px',
+  textAlign: 'right',
+  background: '#eee'
+};
+
+const lineDeltaStyle = Object.assign({}, lineMovementItemStyle, {
+  width: '54px',
+  paddingRight: '35px'
+});
+
+const lineTimeStampStyle = Object.assign({}, lineMovementItemStyle, {
+  width: '75px'
+});
 
 module.exports = ReadonlyPropGroup;
 
