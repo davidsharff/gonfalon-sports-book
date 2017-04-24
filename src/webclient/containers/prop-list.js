@@ -66,6 +66,7 @@ class PropList extends React.Component {
     socket.sendAction({
       type: PLACE_BET,
       payload: {
+        id: utils.createRandomId(),
         propGroupId,
         propId,
         bubbles
